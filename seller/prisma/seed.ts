@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
+import { DEFAULT_APP_SETTINGS } from "../src/lib/app-settings";
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
@@ -38,18 +39,9 @@ async function main() {
   }
 
   // Seed default app settings
-  const defaults = [
-    { key: "platform_markup_percent", value: "15", label: "Platform Markup %", description: "Markup added to selling price for platform price", type: "NUMBER" as const, category: "pricing" },
-    { key: "site_name", value: "ZuriKaribu Sellers", label: "Site Name", description: "Platform name", type: "TEXT" as const, category: "general" },
-    { key: "site_tagline", value: "Discover African Fashion", label: "Site Tagline", type: "TEXT" as const, category: "general" },
-    { key: "contact_email", value: adminEmail, label: "Contact Email", type: "TEXT" as const, category: "general" },
-    { key: "max_product_images", value: "5", label: "Max Product Images", type: "NUMBER" as const, category: "products" },
-    { key: "min_product_images", value: "3", label: "Min Product Images", type: "NUMBER" as const, category: "products" },
-    { key: "auto_push_to_platforms", value: "false", label: "Auto Push to Platforms", type: "BOOLEAN" as const, category: "platforms" },
-    { key: "ai_auto_optimize", value: "false", label: "AI Auto Optimize Descriptions", type: "BOOLEAN" as const, category: "ai" },
-    { key: "currency", value: "USD", label: "Currency", type: "TEXT" as const, category: "pricing" },
-    { key: "seller_approval_required", value: "true", label: "Seller Approval Required", type: "BOOLEAN" as const, category: "sellers" },
-  ];
+  const defaults = DEFAULT_APP_SETTINGS.map((setting) =>
+    setting.key === "contact_email" ? { ...setting, value: adminEmail } : setting
+  );
 
   for (const setting of defaults) {
     await prisma.appSetting.upsert({
