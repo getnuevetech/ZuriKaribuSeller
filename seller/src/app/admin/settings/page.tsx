@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Input, Textarea } from '@/components/ui/Input';
@@ -37,7 +37,7 @@ export default function AdminSettingsPage() {
   const [newSetting, setNewSetting] = useState({ key: '', value: '', label: '', description: '', type: 'TEXT', category: 'general' });
   const [showAddForm, setShowAddForm] = useState(false);
 
-  const fetchSettings = useCallback(async (showLoader = false) => {
+  async function fetchSettings(showLoader = false) {
     if (showLoader) setLoading(true);
     const res = await fetch('/api/admin/settings');
     const data = await res.json();
@@ -47,11 +47,27 @@ export default function AdminSettingsPage() {
     s.forEach((setting: AppSetting) => { vals[setting.key] = setting.value; });
     setLocalValues(vals);
     setLoading(false);
-  }, []);
+  }
 
   useEffect(() => {
-    void fetchSettings();
-  }, [fetchSettings]);
+    let cancelled = false;
+
+    fetch('/api/admin/settings')
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        const s = data.settings || [];
+        setSettings(s);
+        const vals: Record<string, string> = {};
+        s.forEach((setting: AppSetting) => { vals[setting.key] = setting.value; });
+        setLocalValues(vals);
+        setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function saveSettings() {
     setSaving(true);

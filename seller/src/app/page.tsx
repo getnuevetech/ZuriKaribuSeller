@@ -96,10 +96,11 @@ export default async function LandingPage() {
             <div className="space-y-6">
               {landing.sections.heroImage && (
                 <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-stone-900/30 shadow-2xl shadow-black/30">
-                  <img
-                    src={landing.hero.imageUrl}
-                    alt={landing.hero.imageAlt}
-                    className="h-[320px] w-full object-cover md:h-[420px] xl:h-[520px]"
+                  <div
+                    role="img"
+                    aria-label={landing.hero.imageAlt}
+                    className="h-[320px] w-full bg-cover bg-center md:h-[420px] xl:h-[520px]"
+                    style={{ backgroundImage: `url("${landing.hero.imageUrl}")` }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/25 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
