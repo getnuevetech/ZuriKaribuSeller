@@ -27,6 +27,7 @@ npm run db:up
 # 2. Configure environment
 cp .env.example .env
 # Edit .env if needed — DATABASE_URL already matches docker-compose defaults.
+# Prisma also reads DATABASE_URL from .env.local if you prefer keeping local overrides there.
 # Generate a secret: openssl rand -base64 32
 
 # 3. Create schema + seed admin
@@ -91,6 +92,11 @@ npm install
 ```
 
 This project keeps the DB URL in `prisma.config.ts` (Prisma 7), not in `schema.prisma`.
+
+**`P1013: The provided database string is invalid`**  
+Prisma now validates `DATABASE_URL` before DB commands run. Make sure you have copied `.env.example` to `.env` (or set the value in `.env.local`) and that the URL starts with `postgresql://` or `postgres://`.
+
+If you use a custom password, URL-encode any special characters in it.
 
 ## Stack
 - Next.js 16 (App Router) + TypeScript + Tailwind CSS
