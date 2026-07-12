@@ -62,8 +62,21 @@ Google OAuth, AWS S3, and OpenAI keys are optional for basic local auth and brow
 
 ### Troubleshooting
 
-**`P1012: Argument "url" is missing in data source block "db"`**  
-You are running Prisma 6 against a Prisma 7 schema. Confirm the local CLI:
+**`ERESOLVE` / `next@9.3.3` conflicting with `react@19`**  
+Your local `package.json` is out of sync with the repo (this project uses `next@16.2.10`). Reset deps from git and reinstall:
+
+```bash
+git fetch origin
+git checkout origin/main -- package.json package-lock.json
+# or checkout this PR branch fully
+rm -rf node_modules
+npm install
+node -e "console.log(require('./package.json').dependencies.next)"
+# expect: 16.2.10
+```
+
+**`P1012: Argument "url" is missing` or `url is no longer supported`**  
+You are on the wrong Prisma major for this schema. Confirm the local CLI:
 
 ```bash
 npx prisma -v
@@ -73,7 +86,7 @@ npx prisma -v
 Then reinstall from a clean tree:
 
 ```bash
-rm -rf node_modules package-lock.json
+rm -rf node_modules
 npm install
 ```
 
