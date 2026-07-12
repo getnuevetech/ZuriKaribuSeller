@@ -10,7 +10,12 @@ function createPrismaClient() {
   if (!databaseUrl) {
     throw new Error('DATABASE_URL environment variable is not set');
   }
-  const adapter = new PrismaPg({ connectionString: databaseUrl });
+  // Accept connection strings that omit the scheme by normalizing them,
+  // mirroring the handling in prisma.config.ts.
+  const connectionString = databaseUrl.includes('://')
+    ? databaseUrl
+    : `postgresql://${databaseUrl}`;
+  const adapter = new PrismaPg({ connectionString });
   return new PrismaClient({ adapter });
 }
 

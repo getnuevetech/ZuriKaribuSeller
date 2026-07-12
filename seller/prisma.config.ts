@@ -35,6 +35,16 @@ function describeInvalidUrl(value: string): string {
   return `Received scheme: "${scheme}". The value must start with "postgresql://" or "postgres://".`;
 }
 
+// Accept connection strings that omit the scheme (e.g. copied without the
+// "postgresql://" prefix) by normalizing them to a valid PostgreSQL URL.
+function normalizeScheme(value: string): string {
+  if (value.includes("://")) {
+    return value;
+  }
+
+  return `postgresql://${value}`;
+}
+
 function getDatabaseUrl(): string {
   const rawDatabaseUrl = process.env.DATABASE_URL?.trim();
 
@@ -48,7 +58,7 @@ function getDatabaseUrl(): string {
     );
   }
 
-  const databaseUrl = stripWrappingQuotes(rawDatabaseUrl);
+  const databaseUrl = normalizeScheme(stripWrappingQuotes(rawDatabaseUrl));
 
   try {
     const parsedUrl = new URL(databaseUrl);
