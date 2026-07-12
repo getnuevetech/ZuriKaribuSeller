@@ -108,8 +108,8 @@ Or change the host port in `docker-compose.yml` to `5433:5432` and update `DATAB
 DATABASE_URL=postgresql://zurikaribu:zurikaribu@localhost:5433/zurikaribu?schema=public
 ```
 
-**`P1013: The provided database string is invalid`**  
-Prisma now validates `DATABASE_URL` before DB commands run. Make sure you have copied `.env.example` to `.env` (or set the value in `.env.local`) and that the URL starts with `postgresql://` or `postgres://`.
+**`P1013: The provided database string is invalid` / `Received scheme: "(no scheme)"`**  
+Prisma validates `DATABASE_URL` before DB commands run. Make sure you have copied `.env.example` to `.env` (or set the value in `.env.local`). The URL should start with `postgresql://` or `postgres://` — if you omit the scheme it is normalized to `postgresql://` automatically, but the rest of the string must still be valid.
 
 If you use a custom password, URL-encode any special characters in it.
 
