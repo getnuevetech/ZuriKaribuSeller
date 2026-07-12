@@ -30,6 +30,7 @@ interface FormData {
   availableFabrics: string[];
   designFabrics: string[];
   sendSamples: boolean;
+  agreedToTerms: boolean;
 }
 
 const INITIAL_FORM: FormData = {
@@ -47,6 +48,7 @@ const INITIAL_FORM: FormData = {
   availableFabrics: [],
   designFabrics: [],
   sendSamples: false,
+  agreedToTerms: false,
 };
 
 export default function RegisterPage() {
@@ -113,6 +115,10 @@ export default function RegisterPage() {
 
   async function handleSubmit() {
     if (!validateStep(3)) return;
+    if (!form.agreedToTerms) {
+      setErrors((prev) => ({ ...prev, agreedToTerms: 'You must agree to the User Agreement to register' }));
+      return;
+    }
     setLoading(true);
     setSubmitError('');
 
@@ -400,9 +406,40 @@ export default function RegisterPage() {
                   {form.designFabrics.length > 0 && <ReviewItem label="Design Fabrics" value={form.designFabrics.join(', ')} />}
                   <ReviewItem label="Send Samples" value={form.sendSamples ? 'Yes' : 'No'} />
                 </div>
-                <p className="text-stone-500 text-xs text-center">
-                  By registering, you agree to ZuriKaribu&apos;s Terms of Service and Privacy Policy.
-                </p>
+                <div className="space-y-3">
+                  <label className={cn('flex items-start gap-3 cursor-pointer group', errors.agreedToTerms && 'text-red-600')}>
+                    <input
+                      type="checkbox"
+                      checked={form.agreedToTerms}
+                      onChange={(e) => {
+                        updateField('agreedToTerms', e.target.checked);
+                      }}
+                      className="mt-0.5 w-4 h-4 accent-amber-500 shrink-0"
+                    />
+                    <span className="text-sm text-stone-700">
+                      I have read and agree to ZuriKaribu&apos;s{' '}
+                      <Link
+                        href="/user-agreement"
+                        target="_blank"
+                        className="text-amber-600 hover:text-amber-700 font-medium underline"
+                      >
+                        User Agreement
+                      </Link>
+                      {' '}and{' '}
+                      <Link
+                        href="/user-agreement"
+                        target="_blank"
+                        className="text-amber-600 hover:text-amber-700 font-medium underline"
+                      >
+                        Privacy Policy
+                      </Link>
+                      . <span className="text-red-500">*</span>
+                    </span>
+                  </label>
+                  {errors.agreedToTerms && (
+                    <p className="text-xs text-red-500 pl-7">{errors.agreedToTerms}</p>
+                  )}
+                </div>
               </div>
             )}
 

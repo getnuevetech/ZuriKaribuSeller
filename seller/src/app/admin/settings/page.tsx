@@ -24,6 +24,7 @@ const CATEGORY_ICONS: Record<string, string> = {
   platforms: '🔗',
   ai: '🤖',
   sellers: '🏪',
+  legal: '📜',
 };
 
 export default function AdminSettingsPage() {
@@ -104,6 +105,17 @@ export default function AdminSettingsPage() {
           onChange={(e) => setLocalValues((p) => ({ ...p, [setting.key]: e.target.value }))}
           rows={4}
           className="font-mono text-xs"
+        />
+      );
+    }
+
+    if (setting.key === 'user_agreement_content') {
+      return (
+        <Textarea
+          value={value}
+          onChange={(e) => setLocalValues((p) => ({ ...p, [setting.key]: e.target.value }))}
+          rows={16}
+          className="text-sm"
         />
       );
     }
