@@ -26,7 +26,7 @@ async function main() {
       data: {
         email: adminEmail,
         password: hashed,
-        name: "ZuriKaribu Admin",
+        name: "ZuriKaribu Sellers Admin",
         role: "ADMIN",
       },
     });
@@ -40,7 +40,7 @@ async function main() {
   // Seed default app settings
   const defaults = [
     { key: "platform_markup_percent", value: "15", label: "Platform Markup %", description: "Markup added to selling price for platform price", type: "NUMBER" as const, category: "pricing" },
-    { key: "site_name", value: "ZuriKaribu", label: "Site Name", description: "Platform name", type: "TEXT" as const, category: "general" },
+    { key: "site_name", value: "ZuriKaribu Sellers", label: "Site Name", description: "Platform name", type: "TEXT" as const, category: "general" },
     { key: "site_tagline", value: "Discover African Fashion", label: "Site Tagline", type: "TEXT" as const, category: "general" },
     { key: "contact_email", value: adminEmail, label: "Contact Email", type: "TEXT" as const, category: "general" },
     { key: "max_product_images", value: "5", label: "Max Product Images", type: "NUMBER" as const, category: "products" },

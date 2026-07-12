@@ -35,10 +35,10 @@ export default async function AdminDashboard() {
       <header className="bg-stone-900 text-white sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-300 via-orange-400 to-red-500 flex items-center justify-center">
               <span className="font-bold">Z</span>
             </div>
-            <span className="font-bold">ZuriKaribu Admin</span>
+            <span className="font-display font-bold">ZuriKaribu Sellers Admin</span>
           </div>
           <nav className="flex items-center gap-6 text-sm text-stone-400">
             <Link href="/admin" className="text-white font-medium">Overview</Link>

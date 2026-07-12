@@ -20,7 +20,7 @@ const DEFAULT_SETTINGS = [
   },
   {
     key: 'site_name',
-    value: 'ZuriKaribu',
+    value: 'ZuriKaribu Sellers',
     label: 'Site Name',
     description: 'The name of the platform',
     type: 'TEXT' as const,
@@ -92,9 +92,9 @@ const DEFAULT_SETTINGS = [
   },
   {
     key: 'user_agreement_content',
-    value: `Welcome to ZuriKaribu Seller Platform.
+    value: `Welcome to ZuriKaribu Sellers Platform.
 
-By registering as a seller on ZuriKaribu, you agree to the following terms:
+By registering as a seller on ZuriKaribu Sellers, you agree to the following terms:
 
 1. ELIGIBILITY
 You must be at least 18 years old and capable of forming a legally binding contract to register as a seller.
@@ -103,22 +103,22 @@ You must be at least 18 years old and capable of forming a legally binding contr
 You are responsible for ensuring all products listed comply with applicable laws and regulations. You must provide accurate product descriptions, pricing, and images.
 
 3. PLATFORM FEES
-ZuriKaribu charges a platform markup percentage on all sales. The current rate is set by the platform administrators and is subject to change with notice.
+ZuriKaribu Sellers charges a platform markup percentage on all sales. The current rate is set by the platform administrators and is subject to change with notice.
 
 4. PRODUCT STANDARDS
-All products must be authentic and as described. ZuriKaribu reserves the right to remove any listings that violate platform policies.
+All products must be authentic and as described. ZuriKaribu Sellers reserves the right to remove any listings that violate platform policies.
 
 5. PAYMENTS
 Payments are processed through the platform. Sellers will receive payouts according to the payment schedule outlined in the seller dashboard.
 
 6. ACCOUNT SUSPENSION
-ZuriKaribu reserves the right to suspend or terminate seller accounts for violations of these terms or any applicable laws.
+ZuriKaribu Sellers reserves the right to suspend or terminate seller accounts for violations of these terms or any applicable laws.
 
 7. PRIVACY
 Your personal and business information is handled in accordance with our Privacy Policy.
 
 8. CHANGES TO TERMS
-ZuriKaribu may update these terms at any time. Continued use of the platform constitutes acceptance of the updated terms.
+ZuriKaribu Sellers may update these terms at any time. Continued use of the platform constitutes acceptance of the updated terms.
 
 For questions, contact us at hello@zurikaribu.com.`,
     label: 'User Agreement Content',
