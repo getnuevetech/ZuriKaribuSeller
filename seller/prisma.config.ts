@@ -5,7 +5,7 @@ dotenv.config({ path: ".env", override: true });
 dotenv.config({ path: ".env.local", override: true });
 
 const FALLBACK_GENERATE_DATABASE_URL =
-  "******localhost:5432/zurikaribu?schema=public";
+  "postgresql://localhost:5432/zurikaribu?schema=public";
 
 function isGenerateOnlyCommand(): boolean {
   const lifecycleEvent = process.env.npm_lifecycle_event;
@@ -56,7 +56,7 @@ function getDatabaseUrl(): string {
     }
 
     throw new Error(
-      "DATABASE_URL must be a valid PostgreSQL connection string such as ******localhost:5432/database?schema=public. If your password contains special characters, URL-encode them."
+      "DATABASE_URL must be a valid PostgreSQL connection string such as postgresql://localhost:5432/database?schema=public. If your password contains special characters, URL-encode them."
     );
   }
 
