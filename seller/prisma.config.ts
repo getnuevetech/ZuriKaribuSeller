@@ -29,6 +29,12 @@ function stripWrappingQuotes(value: string): string {
   return value;
 }
 
+function describeInvalidUrl(value: string): string {
+  const scheme = value.includes("://") ? value.split("://", 1)[0] : "(no scheme)";
+
+  return `Received scheme: "${scheme}". The value must start with "postgresql://" or "postgres://".`;
+}
+
 function getDatabaseUrl(): string {
   const rawDatabaseUrl = process.env.DATABASE_URL?.trim();
 
@@ -38,7 +44,7 @@ function getDatabaseUrl(): string {
     }
 
     throw new Error(
-      "DATABASE_URL is not set. Copy /home/runner/work/ZuriKaribuSeller/ZuriKaribuSeller/seller/.env.example to /home/runner/work/ZuriKaribuSeller/ZuriKaribuSeller/seller/.env (or set it in .env.local) before running Prisma database commands."
+      "DATABASE_URL is not set. Copy seller/.env.example to seller/.env (or set it in .env.local) before running Prisma database commands."
     );
   }
 
@@ -56,7 +62,9 @@ function getDatabaseUrl(): string {
     }
 
     throw new Error(
-      "DATABASE_URL must be a valid PostgreSQL connection string such as postgresql://localhost:5432/database?schema=public. If your password contains special characters, URL-encode them."
+      `DATABASE_URL must be a valid PostgreSQL connection string such as postgresql://localhost:5432/database?schema=public. ${describeInvalidUrl(
+        databaseUrl
+      )} If your password contains special characters, URL-encode them.`
     );
   }
 
