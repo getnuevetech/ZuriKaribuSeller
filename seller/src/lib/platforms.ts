@@ -103,7 +103,7 @@ async function pushToFacebook(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           url: product.images[0],
-          message: `🌍 ${product.name}\n\n${product.description}\n\n💰 Price: $${product.price}\n\n#AfricanFashion #ZuriKaribu`,
+          message: `🌍 ${product.name}\n\n${product.description}\n\n💰 Price: $${product.price}\n\n#AfricanFashion #ZuriKaribuSellers`,
           access_token: creds.accessToken,
         }),
       }

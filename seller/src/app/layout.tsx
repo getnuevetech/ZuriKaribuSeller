@@ -3,12 +3,13 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
-  title: "ZuriKaribu — Sell African Fashion Globally",
-  description: "ZuriKaribu connects African fashion designers and fabric sellers with customers worldwide. List products once, sell on Instagram, TikTok, Facebook, and eBay.",
+  title: "ZuriKaribu Sellers — Sell African Fashion Globally",
+  description: "ZuriKaribu Sellers connects African fashion designers and fabric sellers with customers worldwide. List products once, sell on Instagram, TikTok, Facebook, and eBay.",
+  applicationName: "ZuriKaribu Sellers",
   keywords: ["African fashion", "sell online", "fashion designer", "fabric seller", "marketplace"],
   openGraph: {
     title: "ZuriKaribu Sellers",
-    description: "Sell African Fashion Globally",
+    description: "ZuriKaribu Sellers helps African fashion businesses reach customers worldwide.",
     type: "website",
   },
 };

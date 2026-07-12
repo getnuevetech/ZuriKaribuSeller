@@ -12,7 +12,7 @@ export async function optimizeProductDescription(
   fabricsUsed: string[],
   sellerType: string
 ): Promise<string> {
-  const prompt = `You are an expert fashion & textile copywriter for an African fashion marketplace called ZuriKaribu.
+  const prompt = `You are an expert fashion & textile copywriter for an African fashion marketplace called ZuriKaribu Sellers.
 
 Optimize the following product description to be more compelling, SEO-friendly, and appealing to international buyers interested in African fashion.
 
