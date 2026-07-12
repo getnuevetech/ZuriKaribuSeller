@@ -93,6 +93,21 @@ npm install
 
 This project keeps the DB URL in `prisma.config.ts` (Prisma 7), not in `schema.prisma`.
 
+**`Bind for 0.0.0.0:5432 failed: port is already allocated`**  
+Another PostgreSQL instance is already using port 5432 on your machine. Either stop it first:
+
+```bash
+# macOS (Homebrew Postgres)
+brew services stop postgresql@16   # adjust version as needed
+npm run db:up
+```
+
+Or change the host port in `docker-compose.yml` to `5433:5432` and update `DATABASE_URL` in your `.env`:
+
+```
+DATABASE_URL=postgresql://zurikaribu:zurikaribu@localhost:5433/zurikaribu?schema=public
+```
+
 **`P1013: The provided database string is invalid`**  
 Prisma now validates `DATABASE_URL` before DB commands run. Make sure you have copied `.env.example` to `.env` (or set the value in `.env.local`) and that the URL starts with `postgresql://` or `postgres://`.
 
