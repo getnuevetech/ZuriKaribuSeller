@@ -43,15 +43,15 @@ export default function LoginPage() {
   const googleEnabled = process.env.NEXT_PUBLIC_GOOGLE_ENABLED === 'true';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-950 to-amber-950 flex items-center justify-center p-4">
+    <div className="african-hero min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-300 via-orange-400 to-red-500 flex items-center justify-center">
               <span className="text-white font-black text-xl">Z</span>
             </div>
-            <span className="text-white text-2xl font-black">ZuriKaribu</span>
+            <span className="font-display text-white text-2xl font-black">ZuriKaribu Sellers</span>
           </Link>
           <p className="text-stone-400 mt-3">Sign in to your seller account</p>
         </div>

@@ -43,10 +43,10 @@ export default async function DashboardPage() {
       <header className="bg-white border-b border-stone-100 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-300 via-orange-400 to-red-500 flex items-center justify-center">
               <span className="text-white font-bold">Z</span>
             </div>
-            <span className="font-bold text-stone-900">ZuriKaribu</span>
+            <span className="font-display font-bold text-stone-900">ZuriKaribu Sellers</span>
           </div>
           <nav className="hidden md:flex items-center gap-6 text-sm text-stone-500">
             <Link href="/dashboard" className="text-amber-600 font-medium">Dashboard</Link>

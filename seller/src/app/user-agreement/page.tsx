@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 
-const DEFAULT_CONTENT = `Welcome to ZuriKaribu Seller Platform.
+const DEFAULT_CONTENT = `Welcome to ZuriKaribu Sellers Platform.
 
-By registering as a seller on ZuriKaribu, you agree to our terms and conditions. Please contact hello@zurikaribu.com for more information.`;
+By registering as a seller on ZuriKaribu Sellers, you agree to our terms and conditions. Please contact hello@zurikaribu.com for more information.`;
 
 async function getUserAgreementContent(): Promise<string> {
   try {
@@ -20,15 +20,15 @@ export default async function UserAgreementPage() {
   const content = await getUserAgreementContent();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-950 to-amber-950 flex items-center justify-center p-4">
+    <div className="african-hero min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-3xl">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-300 via-orange-400 to-red-500 flex items-center justify-center">
               <span className="text-white font-black text-xl">Z</span>
             </div>
-            <span className="text-white text-2xl font-black">ZuriKaribu</span>
+            <span className="font-display text-white text-2xl font-black">ZuriKaribu Sellers</span>
           </Link>
         </div>
 

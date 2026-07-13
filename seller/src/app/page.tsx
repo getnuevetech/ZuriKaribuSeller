@@ -1,254 +1,254 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
+import { getLandingPageContent } from '@/lib/app-settings';
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const landing = await getLandingPageContent();
+
+  const navItems = [
+    landing.sections.features ? { href: '#features', label: 'Features' } : null,
+    landing.sections.howItWorks ? { href: '#how-it-works', label: 'How It Works' } : null,
+    landing.sections.marketplace ? { href: '#marketplace', label: 'Marketplace Reach' } : null,
+  ].filter((item): item is { href: string; label: string } => Boolean(item));
+
   return (
-    <div className="min-h-screen bg-white">
-      {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-5 max-w-7xl mx-auto">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">Z</span>
+    <div className="min-h-screen bg-[var(--brand-cream)] text-stone-900">
+      <header className="sticky top-0 z-30 border-b border-stone-200/80 bg-white/90 backdrop-blur">
+        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-300 via-orange-400 to-red-500 shadow-lg shadow-orange-500/20">
+              <span className="text-lg font-bold text-white">Z</span>
+            </div>
+            <div>
+              <p className="font-display text-lg font-black tracking-tight">{landing.siteName}</p>
+              <p className="text-xs text-stone-500">{landing.siteTagline}</p>
+            </div>
           </div>
-          <span className="text-stone-900 text-xl font-bold tracking-tight">ZuriKaribu</span>
-        </div>
-        <div className="hidden md:flex items-center gap-8 text-stone-500 text-sm">
-          <Link href="#features" className="hover:text-stone-900 transition-colors">Features</Link>
-          <Link href="#how-it-works" className="hover:text-stone-900 transition-colors">How It Works</Link>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link href="/auth/login">
-            <Button variant="ghost" className="text-stone-600 hover:text-stone-900 hover:bg-stone-100">
-              Sign In
-            </Button>
-          </Link>
-          <Link href="/auth/register">
-            <Button variant="primary" size="md">Start Selling</Button>
-          </Link>
-        </div>
-      </nav>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-stone-950 via-stone-900 to-amber-950 min-h-[85vh] flex items-center">
-        {/* Decorative geometric pattern (Kente-inspired) */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none" aria-hidden>
-          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="kente" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
-                <rect width="80" height="80" fill="none"/>
-                <rect x="0" y="0" width="20" height="20" fill="#f59e0b"/>
-                <rect x="20" y="20" width="20" height="20" fill="#f59e0b"/>
-                <rect x="40" y="40" width="20" height="20" fill="#f59e0b"/>
-                <rect x="60" y="60" width="20" height="20" fill="#f59e0b"/>
-                <rect x="20" y="0" width="20" height="20" fill="#10b981"/>
-                <rect x="60" y="0" width="20" height="20" fill="#10b981"/>
-                <rect x="0" y="40" width="20" height="20" fill="#10b981"/>
-                <rect x="40" y="20" width="20" height="20" fill="#10b981"/>
-                <rect x="40" y="0" width="20" height="20" fill="#dc2626"/>
-                <rect x="0" y="20" width="20" height="20" fill="#dc2626"/>
-                <rect x="60" y="40" width="20" height="20" fill="#dc2626"/>
-                <rect x="20" y="60" width="20" height="20" fill="#dc2626"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#kente)"/>
-          </svg>
-        </div>
-
-        {/* Glowing orbs */}
-        <div className="absolute top-20 right-20 w-96 h-96 bg-amber-500 rounded-full blur-3xl opacity-10 pointer-events-none" aria-hidden />
-        <div className="absolute bottom-10 left-10 w-64 h-64 bg-orange-600 rounded-full blur-3xl opacity-10 pointer-events-none" aria-hidden />
-
-        <div className="relative max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-center w-full">
-          {/* Left: copy */}
-          <div>
-            <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-full px-4 py-2 text-amber-400 text-sm mb-8">
-              <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
-              Soft Launch — Join Today
-            </div>
-            <h1 className="text-5xl md:text-6xl font-black text-white leading-tight mb-6">
-              Sell African Fashion<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">Globally</span>
-            </h1>
-            <p className="text-lg text-stone-300 max-w-lg mb-10 leading-relaxed">
-              ZuriKaribu connects African fashion designers and fabric sellers with customers worldwide.
-              List your products once, reach Instagram, TikTok, Facebook, and eBay automatically.
-            </p>
-            <div className="flex flex-col sm:flex-row items-start gap-4">
-              <Link href="/auth/register">
-                <Button size="xl" variant="primary" className="rounded-full px-10">
-                  Start Selling Free
-                </Button>
+          <div className="hidden items-center gap-8 text-sm text-stone-600 md:flex">
+            {navItems.map((item) => (
+              <Link key={item.href} href={item.href} className="transition-colors hover:text-stone-950">
+                {item.label}
               </Link>
-              <Link href="#how-it-works">
-                <Button size="xl" variant="ghost" className="text-stone-300 hover:text-white rounded-full">
-                  See How It Works
-                </Button>
-              </Link>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link href="/auth/login">
+              <Button variant="ghost" className="text-stone-700 hover:bg-stone-100 hover:text-stone-950">
+                Sign In
+              </Button>
+            </Link>
+            <Link href="/auth/register">
+              <Button variant="primary" size="md" className="bg-amber-400 text-stone-950 hover:bg-amber-300">
+                Start Selling
+              </Button>
+            </Link>
+          </div>
+        </nav>
+      </header>
+
+      {landing.sections.hero && (
+        <section className="african-hero overflow-hidden text-white">
+          <div className="mx-auto grid max-w-7xl gap-12 px-6 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-20">
+            <div>
+              <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-amber-200 backdrop-blur-sm">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-300" />
+                {landing.hero.kicker}
+              </div>
+
+              <h1 className="mb-6 max-w-4xl font-display text-5xl font-black leading-[0.95] md:text-7xl">
+                {landing.hero.titlePrefix}
+                <span className="block bg-gradient-to-r from-amber-300 via-orange-300 to-emerald-300 bg-clip-text text-transparent">
+                  {landing.hero.titleHighlight}
+                </span>
+              </h1>
+
+              <p className="mb-10 max-w-2xl text-xl leading-relaxed text-stone-200/90">
+                {landing.hero.description}
+              </p>
+
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <Link href={landing.hero.primaryCtaHref}>
+                  <Button size="xl" variant="primary" className="rounded-full bg-amber-400 px-10 text-stone-950 hover:bg-amber-300">
+                    {landing.hero.primaryCtaLabel}
+                  </Button>
+                </Link>
+                <Link href={landing.hero.secondaryCtaHref}>
+                  <Button size="xl" variant="ghost" className="rounded-full text-stone-100 hover:bg-white/10 hover:text-white">
+                    {landing.hero.secondaryCtaLabel}
+                  </Button>
+                </Link>
+              </div>
+
+              {landing.sections.heroStats && landing.stats.length > 0 && (
+                <div className="mt-14 grid max-w-2xl gap-4 sm:grid-cols-3">
+                  {landing.stats.map((stat) => (
+                    <div key={stat.label} className="rounded-2xl border border-white/10 bg-white/8 px-5 py-4 backdrop-blur-sm">
+                      <div className="font-display text-3xl font-black text-amber-200">{stat.value}</div>
+                      <div className="mt-1 text-sm text-stone-200/80">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="mt-12 grid grid-cols-3 gap-6 max-w-sm">
-              {[{ label: 'Sellers Waiting', value: '500+' }, { label: 'African Countries', value: '20+' }, { label: 'Platforms', value: '4' }].map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <div className="text-2xl font-black text-amber-400">{stat.value}</div>
-                  <div className="text-stone-500 text-xs mt-1">{stat.label}</div>
+
+            <div className="space-y-6">
+              {landing.sections.heroImage && (
+                <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-stone-900/30 shadow-2xl shadow-black/30">
+                  <div
+                    role="img"
+                    aria-label={landing.hero.imageAlt}
+                    className="h-[320px] w-full bg-cover bg-center md:h-[420px] xl:h-[520px]"
+                    style={{ backgroundImage: `url("${landing.hero.imageUrl}")` }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/25 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
+                    <p className="mb-3 text-xs uppercase tracking-[0.28em] text-amber-200/90">
+                      {landing.hero.overlayEyebrow}
+                    </p>
+                    <h2 className="mb-3 max-w-lg font-display text-2xl font-black md:text-3xl">
+                      {landing.hero.overlayTitle}
+                    </h2>
+                    <p className="max-w-xl text-sm leading-relaxed text-stone-200 md:text-base">
+                      {landing.hero.overlayCopy}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {landing.sections.heroHighlights && landing.motifs.length > 0 && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {landing.motifs.map((motif) => (
+                    <div key={motif.name} className="african-pattern-chip rounded-3xl border border-white/10 p-5 text-stone-900 shadow-lg shadow-black/10">
+                      <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-2xl text-xl shadow-sm ${motif.tint}`}>
+                        {motif.icon}
+                      </div>
+                      <p className="font-display text-lg font-bold">{motif.name}</p>
+                      <p className="mt-2 text-sm leading-relaxed text-stone-600">{motif.copy}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {landing.sections.features && (
+        <section id="features" className="bg-white py-24">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="mx-auto mb-16 max-w-3xl text-center">
+              <p className="mb-4 text-sm uppercase tracking-[0.24em] text-amber-700">{landing.features.eyebrow}</p>
+              <h2 className="mb-4 font-display text-4xl font-black text-stone-900">{landing.features.title}</h2>
+              <p className="text-lg text-stone-600">{landing.features.description}</p>
+            </div>
+            <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+              {landing.features.items.map((feature) => (
+                <div key={feature.title} className="rounded-3xl border border-stone-200 bg-[var(--brand-cream)] p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
+                  <div className={`mb-6 flex h-14 w-14 items-center justify-center rounded-2xl text-2xl shadow-sm ${feature.tint}`}>
+                    {feature.icon}
+                  </div>
+                  <h3 className="mb-3 font-display text-xl font-black text-stone-900">{feature.title}</h3>
+                  <p className="leading-relaxed text-stone-600">{feature.desc}</p>
                 </div>
               ))}
             </div>
           </div>
+        </section>
+      )}
 
-          {/* Right: dashboard mockup card */}
-          <div className="relative hidden md:block">
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6 shadow-2xl">
-              {/* Mock dashboard header */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">Z</span>
+      {landing.sections.howItWorks && (
+        <section id="how-it-works" className="bg-stone-950 py-24 text-white">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="mx-auto mb-16 max-w-3xl text-center">
+              <p className="mb-4 text-sm uppercase tracking-[0.24em] text-amber-300">{landing.howItWorks.eyebrow}</p>
+              <h2 className="mb-4 font-display text-4xl font-black">{landing.howItWorks.title}</h2>
+              <p className="text-lg text-stone-300">{landing.howItWorks.description}</p>
+            </div>
+            <div className="grid gap-8 md:grid-cols-3">
+              {landing.howItWorks.steps.map((step, index) => (
+                <div key={`${step.title}-${index}`} className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
+                  <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 via-orange-400 to-red-500 font-display text-2xl font-black text-stone-950">
+                    {index + 1}
                   </div>
-                  <span className="text-white font-bold text-sm">Seller Dashboard</span>
+                  <h3 className="mb-3 font-display text-2xl font-black">{step.title}</h3>
+                  <p className="leading-relaxed text-stone-300">{step.desc}</p>
                 </div>
-                <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {landing.sections.marketplace && (
+        <section id="marketplace" className="bg-[var(--brand-cream)] py-24">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="rounded-[2rem] border border-stone-200 bg-white p-8 shadow-sm lg:p-12">
+              <div className="grid gap-10 lg:grid-cols-[1fr_0.8fr] lg:items-center">
+                <div>
+                  <p className="mb-4 text-sm uppercase tracking-[0.24em] text-emerald-700">{landing.marketplace.eyebrow}</p>
+                  <h2 className="mb-4 font-display text-4xl font-black text-stone-900">{landing.marketplace.title}</h2>
+                  <p className="mb-8 max-w-2xl text-lg text-stone-600">{landing.marketplace.description}</p>
+                  <div className="flex flex-wrap items-center gap-4">
+                    {landing.marketplace.platforms.map((platform) => (
+                      <div key={platform.name} className="flex items-center gap-3 rounded-2xl bg-stone-100 px-6 py-4 font-semibold text-stone-700 shadow-sm">
+                        <span className="text-2xl">{platform.icon}</span>
+                        {platform.name}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              {/* Mock stat cards */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                {[
-                  { label: 'Products', value: '12', color: 'bg-amber-500/20 text-amber-300' },
-                  { label: 'Published', value: '8', color: 'bg-green-500/20 text-green-300' },
-                  { label: 'Platforms', value: '4', color: 'bg-blue-500/20 text-blue-300' },
-                  { label: 'Pending', value: '3', color: 'bg-orange-500/20 text-orange-300' },
-                ].map((s) => (
-                  <div key={s.label} className={`rounded-2xl px-4 py-3 ${s.color}`}>
-                    <div className="text-xl font-black">{s.value}</div>
-                    <div className="text-xs opacity-70 mt-0.5">{s.label}</div>
+                <div className="rounded-[1.75rem] bg-stone-950 p-8 text-white">
+                  <div className="kente-divider mb-6" />
+                  <p className="mb-6 text-sm leading-relaxed text-stone-300">{landing.marketplace.panelCopy}</p>
+                  <div className="space-y-4">
+                    {landing.marketplace.highlights.map((item) => (
+                      <div key={item.label} className="flex items-start gap-3">
+                        <span className="mt-1 text-amber-300">◆</span>
+                        <div>
+                          <p className="font-display text-lg font-bold">{item.label}</p>
+                          <p className="text-sm text-stone-300">{item.copy}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              {/* Mock product rows */}
-              <div className="space-y-2">
-                {[
-                  { name: 'Ankara Maxi Dress', status: '✅ Live', platforms: '4' },
-                  { name: 'Kente Headwrap Set', status: '✅ Live', platforms: '3' },
-                  { name: 'Adire Silk Blouse', status: '⏳ Pending', platforms: '—' },
-                ].map((p) => (
-                  <div key={p.name} className="flex items-center justify-between bg-white/5 rounded-xl px-3 py-2">
-                    <div>
-                      <p className="text-white text-xs font-medium">{p.name}</p>
-                      <p className="text-stone-400 text-xs">{p.platforms} platforms</p>
-                    </div>
-                    <span className="text-xs text-stone-300">{p.status}</span>
-                  </div>
-                ))}
-              </div>
-              {/* Platform badges */}
-              <div className="flex gap-2 mt-4">
-                {['📸 IG', '🎵 TT', '👍 FB', '🛒 eBay'].map((p) => (
-                  <span key={p} className="text-xs bg-amber-500/20 text-amber-300 rounded-full px-2.5 py-1">{p}</span>
-                ))}
+                </div>
               </div>
             </div>
-            {/* Floating fabric-swatch accent */}
-            <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 opacity-20 blur-xl pointer-events-none" aria-hidden />
-            <div className="absolute -bottom-4 -left-4 w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-teal-500 opacity-20 blur-xl pointer-events-none" aria-hidden />
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* Features */}
-      <section id="features" className="bg-stone-50 py-24">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-black text-stone-900 mb-4">Everything You Need to Sell Online</h2>
-            <p className="text-stone-500 text-lg max-w-2xl mx-auto">From listing to sale, ZuriKaribu handles the complexity so you can focus on creating.</p>
+      {landing.sections.growthCta && (
+        <section className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 py-24">
+          <div className="mx-auto max-w-7xl px-6 text-center">
+            <p className="mb-4 text-sm uppercase tracking-[0.24em] text-white/80">{landing.growthCta.eyebrow}</p>
+            <h2 className="mb-4 font-display text-4xl font-black text-white">{landing.growthCta.title}</h2>
+            <p className="mx-auto mb-8 max-w-2xl text-lg text-white/90">{landing.growthCta.description}</p>
+            <Link href={landing.growthCta.ctaHref}>
+              <Button variant="secondary" size="xl" className="rounded-full bg-stone-950 hover:bg-stone-900">
+                {landing.growthCta.ctaLabel}
+              </Button>
+            </Link>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {features.map((f) => (
-              <div key={f.title} className="p-8 rounded-2xl bg-white border border-stone-100 hover:border-amber-200 hover:shadow-lg transition-all group">
-                <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-600 mb-6 group-hover:bg-amber-200 transition-colors text-2xl">{f.icon}</div>
-                <h3 className="text-lg font-bold text-stone-900 mb-3">{f.title}</h3>
-                <p className="text-stone-600 leading-relaxed">{f.desc}</p>
+        </section>
+      )}
+
+      {landing.sections.footer && (
+        <footer className="border-t border-stone-800 bg-stone-950 py-12">
+          <div className="mx-auto max-w-7xl px-6 text-center text-stone-400">
+            <div className="mb-6 flex items-center justify-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-300 via-orange-400 to-red-500">
+                <span className="font-bold text-white">Z</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section id="how-it-works" className="bg-gradient-to-br from-stone-950 to-amber-950 py-24">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-black text-white mb-4">Get Selling in 3 Simple Steps</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-12">
-            {steps.map((s, i) => (
-              <div key={s.title} className="text-center">
-                <div className="w-16 h-16 rounded-full bg-amber-500 text-white font-black text-2xl flex items-center justify-center mx-auto mb-6">{i + 1}</div>
-                <h3 className="text-xl font-bold text-white mb-3">{s.title}</h3>
-                <p className="text-stone-400 leading-relaxed">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Platforms */}
-      <section className="bg-white py-24 border-t border-stone-100">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-black text-stone-900 mb-4">Reach Customers Everywhere</h2>
-          <p className="text-stone-500 text-lg mb-12 max-w-xl mx-auto">One upload, four platforms. Your products automatically appear where your customers shop.</p>
-          <div className="flex flex-wrap items-center justify-center gap-6">
-            {[
-              { label: '📸 Instagram', bg: 'from-pink-500 to-purple-600' },
-              { label: '🎵 TikTok', bg: 'from-stone-800 to-stone-900' },
-              { label: '👍 Facebook', bg: 'from-blue-600 to-blue-700' },
-              { label: '🛒 eBay', bg: 'from-amber-500 to-orange-500' },
-            ].map((p) => (
-              <div key={p.label} className={`flex items-center gap-3 bg-gradient-to-r ${p.bg} rounded-2xl px-8 py-5 text-white font-semibold text-lg shadow-lg`}>{p.label}</div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* AI CTA */}
-      <section className="bg-gradient-to-r from-amber-500 to-orange-500 py-24">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-black text-white mb-4">AI-Powered Product Optimization</h2>
-          <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">Our AI optimizes your product descriptions and captions for every platform to drive more sales.</p>
-          <Link href="/auth/register">
-            <Button variant="secondary" size="xl" className="rounded-full bg-stone-900 hover:bg-stone-800">Try It Free</Button>
-          </Link>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-stone-950 border-t border-stone-800 py-12">
-        <div className="max-w-7xl mx-auto px-6 text-center text-stone-500">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center">
-              <span className="text-white font-bold">Z</span>
+              <span className="font-display font-black text-white">{landing.siteName}</span>
             </div>
-            <span className="text-white font-bold">ZuriKaribu</span>
+            <p className="text-sm">&copy; {new Date().getFullYear()} {landing.siteName}. All rights reserved.</p>
+            <p className="mt-2 text-xs text-stone-500">{landing.footerNote}</p>
           </div>
-          <p className="text-sm">&copy; {new Date().getFullYear()} ZuriKaribu. All rights reserved.</p>
-          <p className="text-xs mt-2 text-stone-600">&quot;Zuri&quot; means &quot;beautiful&quot; in Swahili &bull; &quot;Karibu&quot; means &quot;welcome&quot;</p>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 }
-
-const features = [
-  {icon:'🌍',title:'Multi-Platform Publishing',desc:'Publish products to Instagram, TikTok, Facebook, and eBay with a single click. Update everywhere at once.'},
-  {icon:'🤖',title:'AI-Optimized Listings',desc:'Our AI rewrites your product descriptions to maximize engagement and sales conversions on each platform.'},
-  {icon:'📸',title:'Smart Image Management',desc:'Upload up to 5 product images to secure cloud storage. AI analyzes colors, style, and suggests improvements.'},
-  {icon:'🏪',title:'Seller Dashboard',desc:"Track your products, see where they're selling, and manage everything from one beautiful dashboard."},
-  {icon:'💰',title:'Transparent Pricing',desc:'Set your selling price and we automatically calculate platform pricing with clear margins.'},
-  {icon:'🔒',title:'Secure & Reliable',desc:'Enterprise-grade security with Google login, encrypted data, and AWS cloud infrastructure.'},
-];
-const steps = [
-  {title:'Create Your Profile',desc:'Register as a Fashion Designer or Fabric Seller. Tell us about your business and the fabrics you work with.'},
-  {title:'Upload Your Products',desc:'Add product photos (3-5 images), descriptions, and pricing. Our AI optimizes everything automatically.'},
-  {title:'Sell Globally',desc:'With one click, your products appear on Instagram, TikTok, Facebook, and eBay. Start getting orders today.'},
-];

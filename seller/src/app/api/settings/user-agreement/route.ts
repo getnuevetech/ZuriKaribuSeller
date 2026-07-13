@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-const DEFAULT_CONTENT = `Welcome to ZuriKaribu Seller Platform.
+const DEFAULT_CONTENT = `Welcome to ZuriKaribu Sellers Platform.
 
-By registering as a seller on ZuriKaribu, you agree to our terms and conditions. Please contact hello@zurikaribu.com for more information.`;
+By registering as a seller on ZuriKaribu Sellers, you agree to our terms and conditions. Please contact hello@zurikaribu.com for more information.`;
 
 export async function GET() {
   try {

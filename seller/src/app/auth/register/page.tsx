@@ -179,15 +179,15 @@ export default function RegisterPage() {
   const selectedCountry = ALL_COUNTRIES.find((c) => c.code === form.country);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-950 to-amber-950 flex items-center justify-center p-4">
+    <div className="african-hero min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-300 via-orange-400 to-red-500 flex items-center justify-center">
               <span className="text-white font-black text-xl">Z</span>
             </div>
-            <span className="text-white text-2xl font-black">ZuriKaribu</span>
+            <span className="font-display text-white text-2xl font-black">ZuriKaribu Sellers</span>
           </Link>
           <p className="text-stone-400 mt-3">Join thousands of African fashion sellers</p>
         </div>
@@ -436,7 +436,7 @@ export default function RegisterPage() {
                       className="mt-0.5 w-4 h-4 accent-amber-500 shrink-0"
                     />
                     <span className="text-sm text-stone-700">
-                      I have read and agree to ZuriKaribu&apos;s{' '}
+                      I have read and agree to ZuriKaribu Sellers&apos;{' '}
                       <Link
                         href="/user-agreement"
                         target="_blank"

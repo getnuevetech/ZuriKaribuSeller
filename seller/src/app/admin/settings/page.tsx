@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Input, Textarea } from '@/components/ui/Input';
-import { Card, CardContent, Badge } from '@/components/ui/Card';
+import { Card, Badge } from '@/components/ui/Card';
 import { cn } from '@/lib/utils';
 
 interface AppSetting {
@@ -25,6 +25,7 @@ const CATEGORY_ICONS: Record<string, string> = {
   ai: '🤖',
   sellers: '🏪',
   legal: '📜',
+  landing: '🏠',
 };
 
 export default function AdminSettingsPage() {
@@ -36,8 +37,8 @@ export default function AdminSettingsPage() {
   const [newSetting, setNewSetting] = useState({ key: '', value: '', label: '', description: '', type: 'TEXT', category: 'general' });
   const [showAddForm, setShowAddForm] = useState(false);
 
-  async function fetchSettings() {
-    setLoading(true);
+  async function fetchSettings(showLoader = false) {
+    if (showLoader) setLoading(true);
     const res = await fetch('/api/admin/settings');
     const data = await res.json();
     const s = data.settings || [];
@@ -48,7 +49,25 @@ export default function AdminSettingsPage() {
     setLoading(false);
   }
 
-  useEffect(() => { fetchSettings(); }, []);
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch('/api/admin/settings')
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        const s = data.settings || [];
+        setSettings(s);
+        const vals: Record<string, string> = {};
+        s.forEach((setting: AppSetting) => { vals[setting.key] = setting.value; });
+        setLocalValues(vals);
+        setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function saveSettings() {
     setSaving(true);
@@ -73,7 +92,7 @@ export default function AdminSettingsPage() {
     });
     setNewSetting({ key: '', value: '', label: '', description: '', type: 'TEXT', category: 'general' });
     setShowAddForm(false);
-    await fetchSettings();
+    await fetchSettings(true);
   }
 
   const categories = [...new Set(settings.map((s) => s.category))];
@@ -103,18 +122,21 @@ export default function AdminSettingsPage() {
         <Textarea
           value={value}
           onChange={(e) => setLocalValues((p) => ({ ...p, [setting.key]: e.target.value }))}
-          rows={4}
+          rows={10}
           className="font-mono text-xs"
         />
       );
     }
 
-    if (setting.key === 'user_agreement_content') {
+    if (
+      setting.key === 'user_agreement_content' ||
+      (setting.category === 'landing' && value.length > 80 && !setting.key.endsWith('_href') && !setting.key.endsWith('_url'))
+    ) {
       return (
         <Textarea
           value={value}
           onChange={(e) => setLocalValues((p) => ({ ...p, [setting.key]: e.target.value }))}
-          rows={16}
+          rows={setting.key === 'user_agreement_content' ? 16 : 6}
           className="text-sm"
         />
       );
@@ -199,7 +221,7 @@ export default function AdminSettingsPage() {
                             {setting.description && (
                               <p className="text-stone-500 text-xs mb-3">{setting.description}</p>
                             )}
-                            <div className="max-w-sm">
+                            <div className={cn('max-w-sm', setting.category === 'landing' && 'max-w-3xl')}>
                               {renderSettingInput(setting)}
                             </div>
                           </div>
