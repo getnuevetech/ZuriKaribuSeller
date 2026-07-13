@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, Badge } from '@/components/ui/Card';
+import { cn } from '@/lib/utils';
 
 interface User {
   id: string;
@@ -21,24 +22,33 @@ interface User {
   };
 }
 
+const ROLE_TABS = [
+  { label: 'All Users', value: '' },
+  { label: '👑 Admins', value: 'ADMIN' },
+  { label: '🏪 Sellers', value: 'SELLER' },
+];
+
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
 
   async function fetchUsers() {
     setLoading(true);
-    const res = await fetch(`/api/admin/users?page=${page}&search=${search}`);
+    const params = new URLSearchParams({ page: String(page), search });
+    if (roleFilter) params.set('role', roleFilter);
+    const res = await fetch(`/api/admin/users?${params}`);
     const data = await res.json();
     setUsers(data.users || []);
     setTotal(data.total || 0);
     setLoading(false);
   }
 
-  useEffect(() => { fetchUsers(); }, [page, search]);
+  useEffect(() => { fetchUsers(); }, [page, search, roleFilter]);
 
   async function updateSellerStatus(userId: string, sellerStatus: string) {
     setUpdating(userId);
@@ -49,6 +59,11 @@ export default function AdminUsersPage() {
     });
     await fetchUsers();
     setUpdating(null);
+  }
+
+  function handleTabChange(value: string) {
+    setRoleFilter(value);
+    setPage(1);
   }
 
   return (
@@ -69,9 +84,27 @@ export default function AdminUsersPage() {
           <Input
             placeholder="Search by name or email..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             className="w-72"
           />
+        </div>
+
+        {/* Role Filter Tabs */}
+        <div className="flex gap-2 mb-6 border-b border-stone-200">
+          {ROLE_TABS.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => handleTabChange(tab.value)}
+              className={cn(
+                'px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px',
+                roleFilter === tab.value
+                  ? 'border-amber-500 text-amber-600'
+                  : 'border-transparent text-stone-500 hover:text-stone-800'
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         <Card className="overflow-hidden">
@@ -94,11 +127,20 @@ export default function AdminUsersPage() {
                 ) : users.length === 0 ? (
                   <tr><td colSpan={7} className="py-12 text-center text-stone-400">No users found</td></tr>
                 ) : users.map((user) => (
-                  <tr key={user.id} className="hover:bg-stone-50">
+                  <tr
+                    key={user.id}
+                    className={cn(
+                      'hover:bg-stone-50',
+                      user.role === 'ADMIN' && 'bg-amber-50/40 hover:bg-amber-50'
+                    )}
+                  >
                     <td className="px-6 py-4">
-                      <div>
-                        <p className="font-medium text-stone-900">{user.name || '—'}</p>
-                        <p className="text-stone-500 text-xs">{user.email}</p>
+                      <div className="flex items-center gap-2">
+                        {user.role === 'ADMIN' && <span title="Admin">👑</span>}
+                        <div>
+                          <p className="font-medium text-stone-900">{user.name || '—'}</p>
+                          <p className="text-stone-500 text-xs">{user.email}</p>
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -112,6 +154,8 @@ export default function AdminUsersPage() {
                             {user.seller.sellerType === 'FASHION_DESIGNER' ? '👗 Designer' : '🧵 Fabric Seller'}
                           </p>
                         </div>
+                      ) : user.role === 'ADMIN' ? (
+                        <span className="text-stone-400 text-xs italic">Admin account</span>
                       ) : '—'}
                     </td>
                     <td className="px-6 py-4 text-stone-600">{user.seller?.country || '—'}</td>

@@ -86,8 +86,12 @@ model Seller {
   designFabrics   String[]
   sendSamples     Boolean      @default(false)
   status          SellerStatus @default(PENDING)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  // Payment methods
+  paypalEmail        String?
+  wireTransferInfo   Json?
+  localDepositInfo   Json?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   products Product[]
