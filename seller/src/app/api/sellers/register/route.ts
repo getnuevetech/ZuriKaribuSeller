@@ -78,6 +78,25 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error('Registration error:', err);
-    return NextResponse.json({ error: 'Registration failed' }, { status: 500 });
+
+    if (err instanceof Error) {
+      if (
+        err.message.includes('Unique constraint') ||
+        err.message.includes('unique constraint') ||
+        (err as { code?: string }).code === 'P2002'
+      ) {
+        return NextResponse.json({ error: 'This email address is already registered. Please sign in instead.' }, { status: 409 });
+      }
+      if (
+        err.message.includes('DATABASE_URL') ||
+        err.message.includes('database') ||
+        (err as { code?: string }).code === 'P1001' ||
+        (err as { code?: string }).code === 'P1003'
+      ) {
+        return NextResponse.json({ error: 'Database is temporarily unavailable. Please try again in a moment.' }, { status: 503 });
+      }
+    }
+
+    return NextResponse.json({ error: 'Registration failed. Please check your details and try again.' }, { status: 500 });
   }
 }
