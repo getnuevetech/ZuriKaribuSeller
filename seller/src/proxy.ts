@@ -11,7 +11,11 @@ export default async function proxy(req: NextRequest) {
 
   // Public routes
   const publicRoutes = ['/', '/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password'];
-  const isPublic = publicRoutes.includes(pathname) || pathname.startsWith('/api/auth');
+  const publicApiRoutes = [
+    '/api/auth',
+    '/api/sellers/register',
+  ];
+  const isPublic = publicRoutes.includes(pathname) || publicApiRoutes.some((route) => pathname.startsWith(route));
 
   if (isPublic) return NextResponse.next();
 
