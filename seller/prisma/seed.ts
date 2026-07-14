@@ -13,7 +13,12 @@ const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: databaseUrl }),
 });
 
-async function upsertAdmin(email: string, password: string, name: string) {
+async function upsertAdmin(
+  email: string,
+  password: string,
+  name: string,
+  updatePassword = false
+) {
   const existingAdmin = await prisma.user.findUnique({ where: { email } });
   if (!existingAdmin) {
     const hashed = await bcrypt.hash(password, 12);
@@ -57,6 +62,16 @@ async function upsertAdmin(email: string, password: string, name: string) {
     } else {
       console.log(`ℹ️  Admin user already exists: ${email}`);
     }
+    // Update password when explicitly requested (e.g. password reset via seed)
+    if (updatePassword) {
+      const hashed = await bcrypt.hash(password, 12);
+      await prisma.user.update({
+        where: { id: existingAdmin.id },
+        data: { password: hashed },
+      });
+      console.log(`🔑 Password updated for: ${email}`);
+      console.log("   ⚠️  Change this password immediately after first login!");
+    }
   }
 }
 
@@ -66,13 +81,26 @@ async function main() {
   // Create primary admin user
   const adminEmail = process.env.ADMIN_EMAIL || "admin@zurikaribu.com";
   const adminPassword = process.env.ADMIN_PASSWORD || "Admin@ZuriKaribu2024!";
-  await upsertAdmin(adminEmail, adminPassword, "ZuriKaribu Sellers Admin");
+  if (!adminPassword.trim()) {
+    throw new Error("ADMIN_PASSWORD must not be empty");
+  }
+  // Password is updated when ADMIN_PASSWORD is explicitly set in the environment
+  await upsertAdmin(adminEmail, adminPassword, "ZuriKaribu Sellers Admin", !!process.env.ADMIN_PASSWORD);
 
   // Create secondary admin user (e.g. ag@nuevetech.io)
   const secondaryAdminEmail = process.env.SECONDARY_ADMIN_EMAIL || "ag@nuevetech.io";
-  const secondaryAdminPassword = process.env.SECONDARY_ADMIN_PASSWORD || "Admin@NueveTech2024!";
+  const secondaryAdminPasswordEnv = process.env.SECONDARY_ADMIN_PASSWORD;
+  const secondaryAdminPassword = secondaryAdminPasswordEnv || "Admin@NueveTech2024!";
+  if (secondaryAdminPasswordEnv !== undefined && !secondaryAdminPasswordEnv.trim()) {
+    throw new Error("SECONDARY_ADMIN_PASSWORD must not be empty when set");
+  }
   if (secondaryAdminEmail !== adminEmail) {
-    await upsertAdmin(secondaryAdminEmail, secondaryAdminPassword, "Platform Admin");
+    await upsertAdmin(
+      secondaryAdminEmail,
+      secondaryAdminPassword,
+      "Platform Admin",
+      !!secondaryAdminPasswordEnv
+    );
   }
 
   // Seed default app settings
