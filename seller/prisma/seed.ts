@@ -29,12 +29,27 @@ async function main() {
         password: hashed,
         name: "ZuriKaribu Sellers Admin",
         role: "ADMIN",
+        adminProfile: {
+          create: {
+            title: "Platform Administrator",
+            isSuperAdmin: true,
+          },
+        },
       },
     });
     console.log(`✅ Admin user created: ${adminEmail}`);
     console.log(`   Password: ${adminPassword}`);
     console.log("   ⚠️  Change this password immediately after first login!");
   } else {
+    await prisma.adminProfile.upsert({
+      where: { userId: existingAdmin.id },
+      update: {},
+      create: {
+        userId: existingAdmin.id,
+        title: "Platform Administrator",
+        isSuperAdmin: true,
+      },
+    });
     console.log(`ℹ️  Admin user already exists: ${adminEmail}`);
   }
 

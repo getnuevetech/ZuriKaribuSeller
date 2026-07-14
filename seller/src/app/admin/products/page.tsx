@@ -1,23 +1,33 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { Input, Select, Textarea } from '@/components/ui/Input';
 import { Card, Badge } from '@/components/ui/Card';
+
+interface SellerOption {
+  id: string;
+  user: { email: string; name: string };
+  seller: { id: string; businessName: string } | null;
+}
 
 interface Product {
   id: string;
   name: string;
   description: string;
+  fabricsUsed: string[];
+  costPrice: number;
   sellingPrice: number;
   platformPrice: number;
   status: string;
   aiOptimized: boolean;
   createdAt: string;
-  images: { url: string; isPrimary: boolean }[];
+  images: { url: string; s3Key: string; isPrimary: boolean }[];
   seller: {
+    id: string;
     name: string;
+    businessName: string;
     user: { email: string; name: string };
   };
   platformProducts: {
@@ -27,8 +37,47 @@ interface Product {
   }[];
 }
 
+type ProductFormState = {
+  id?: string;
+  sellerId: string;
+  name: string;
+  description: string;
+  fabricsUsed: string;
+  costPrice: string;
+  sellingPrice: string;
+  status: string;
+  images: string;
+};
+
+const INITIAL_FORM: ProductFormState = {
+  sellerId: '',
+  name: '',
+  description: '',
+  fabricsUsed: '',
+  costPrice: '',
+  sellingPrice: '',
+  status: 'DRAFT',
+  images: '',
+};
+
+function parseList(value: string) {
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function parseImageLines(value: string) {
+  return value
+    .split('\n')
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .map((url) => ({ url, s3Key: url }));
+}
+
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [sellers, setSellers] = useState<SellerOption[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -36,17 +85,53 @@ export default function AdminProductsPage() {
   const [selected, setSelected] = useState<string[]>([]);
   const [pushing, setPushing] = useState(false);
   const [pushMessage, setPushMessage] = useState('');
+  const [form, setForm] = useState<ProductFormState>(INITIAL_FORM);
+  const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [formMessage, setFormMessage] = useState('');
 
-  async function fetchProducts() {
-    setLoading(true);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadData() {
+      setLoading(true);
+
+      const [productsRes, sellersRes] = await Promise.all([
+        fetch(`/api/admin/products?page=${page}&search=${search}`),
+        fetch('/api/admin/users?role=SELLER&limit=200'),
+      ]);
+
+      const [productsData, sellersData] = await Promise.all([
+        productsRes.json(),
+        sellersRes.json(),
+      ]);
+
+      if (cancelled) return;
+
+      setProducts(productsData.products || []);
+      setTotal(productsData.total || 0);
+      setSellers((sellersData.users || []).filter((user: SellerOption) => user.seller));
+      setLoading(false);
+    }
+
+    void loadData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [page, search]);
+
+  const sellerOptions = useMemo(() => sellers.map((seller) => ({
+    value: seller.seller?.id || '',
+    label: `${seller.seller?.businessName || seller.user.name} (${seller.user.email})`,
+  })), [sellers]);
+
+  async function refreshProducts() {
     const res = await fetch(`/api/admin/products?page=${page}&search=${search}`);
     const data = await res.json();
     setProducts(data.products || []);
     setTotal(data.total || 0);
-    setLoading(false);
   }
-
-  useEffect(() => { fetchProducts(); }, [page, search]);
 
   async function pushToAllPlatforms(productId?: string) {
     const ids = productId ? [productId] : selected;
@@ -55,15 +140,14 @@ export default function AdminProductsPage() {
     setPushing(true);
     setPushMessage('');
 
-    const res = await fetch('/api/admin/push', {
+    await fetch('/api/admin/push', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ productIds: ids, pushAll: true }),
     });
-    const data = await res.json();
     setPushMessage(`Pushed ${ids.length} product(s) to all platforms`);
     setPushing(false);
-    await fetchProducts();
+    await refreshProducts();
   }
 
   async function updateProductStatus(productId: string, status: string) {
@@ -72,7 +156,7 @@ export default function AdminProductsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
     });
-    await fetchProducts();
+    await refreshProducts();
   }
 
   async function deleteProduct(productId: string) {
@@ -82,11 +166,68 @@ export default function AdminProductsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({}),
     });
-    await fetchProducts();
+    await refreshProducts();
   }
 
   function toggleSelect(id: string) {
     setSelected((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+  }
+
+  function openCreate() {
+    setForm(INITIAL_FORM);
+    setFormMessage('');
+    setShowForm(true);
+  }
+
+  function openEdit(product: Product) {
+    setForm({
+      id: product.id,
+      sellerId: product.seller.id,
+      name: product.name,
+      description: product.description,
+      fabricsUsed: product.fabricsUsed.join(', '),
+      costPrice: String(product.costPrice),
+      sellingPrice: String(product.sellingPrice),
+      status: product.status,
+      images: product.images.map((image) => image.url).join('\n'),
+    });
+    setFormMessage('');
+    setShowForm(true);
+  }
+
+  async function saveProduct() {
+    setSaving(true);
+    setFormMessage('');
+
+    const payload = {
+      sellerId: form.sellerId,
+      name: form.name,
+      description: form.description,
+      fabricsUsed: parseList(form.fabricsUsed),
+      costPrice: form.costPrice,
+      sellingPrice: form.sellingPrice,
+      status: form.status,
+      images: parseImageLines(form.images),
+    };
+
+    const res = await fetch(form.id ? `/api/admin/products/${form.id}` : '/api/admin/products', {
+      method: form.id ? 'PATCH' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      setFormMessage(data.error || 'Failed to save product');
+      setSaving(false);
+      return;
+    }
+
+    setForm(INITIAL_FORM);
+    setFormMessage('Product saved successfully.');
+    setShowForm(false);
+    setSaving(false);
+    await refreshProducts();
   }
 
   return (
@@ -98,14 +239,15 @@ export default function AdminProductsPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
+      <main className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h2 className="text-xl font-black text-stone-900">All Products</h2>
             <p className="text-stone-500 text-sm">{total} products</p>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
             <Input placeholder="Search products..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-64" />
+            <Button onClick={openCreate}>+ Add Product</Button>
             {selected.length > 0 && (
               <Button onClick={() => pushToAllPlatforms()} loading={pushing} variant="primary">
                 🚀 Push {selected.length} to All Platforms
@@ -115,9 +257,70 @@ export default function AdminProductsPage() {
         </div>
 
         {pushMessage && (
-          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
+          <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
             ✅ {pushMessage}
           </div>
+        )}
+
+        {showForm && (
+          <Card className="p-6 space-y-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-stone-900">{form.id ? 'Edit Product' : 'Create Product'}</h3>
+                <p className="text-sm text-stone-500">Assign the product to a seller and manage all listing details from the admin portal.</p>
+              </div>
+              <Button variant="ghost" onClick={() => setShowForm(false)}>Close</Button>
+            </div>
+
+            {formMessage && (
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm">
+                {formMessage}
+              </div>
+            )}
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Select
+                label="Seller"
+                value={form.sellerId}
+                onChange={(e) => setForm((prev) => ({ ...prev, sellerId: e.target.value }))}
+                options={sellerOptions}
+                placeholder="Choose seller"
+              />
+              <Select
+                label="Status"
+                value={form.status}
+                onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value }))}
+                options={[
+                  { value: 'DRAFT', label: 'Draft' },
+                  { value: 'ACTIVE', label: 'Active' },
+                  { value: 'INACTIVE', label: 'Inactive' },
+                ]}
+              />
+              <Input label="Product Name" value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} />
+              <Input label="Fabrics Used" value={form.fabricsUsed} onChange={(e) => setForm((prev) => ({ ...prev, fabricsUsed: e.target.value }))} hint="Comma-separated list" />
+              <Input label="Cost Price" type="number" step="0.01" value={form.costPrice} onChange={(e) => setForm((prev) => ({ ...prev, costPrice: e.target.value }))} />
+              <Input label="Selling Price" type="number" step="0.01" value={form.sellingPrice} onChange={(e) => setForm((prev) => ({ ...prev, sellingPrice: e.target.value }))} />
+            </div>
+
+            <Textarea
+              label="Description"
+              value={form.description}
+              onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+              rows={5}
+            />
+            <Textarea
+              label="Image URLs"
+              value={form.images}
+              onChange={(e) => setForm((prev) => ({ ...prev, images: e.target.value }))}
+              rows={5}
+              hint="One image URL per line"
+            />
+
+            <div className="flex justify-end gap-3">
+              <Button variant="ghost" onClick={() => setShowForm(false)}>Cancel</Button>
+              <Button onClick={saveProduct} loading={saving}>Save Product</Button>
+            </div>
+          </Card>
         )}
 
         <Card className="overflow-hidden">
@@ -169,7 +372,7 @@ export default function AdminProductsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-stone-800 text-xs">{product.seller?.name}</p>
+                      <p className="text-stone-800 text-xs">{product.seller?.businessName || product.seller?.name}</p>
                       <p className="text-stone-500 text-xs">{product.seller?.user?.email}</p>
                     </td>
                     <td className="px-6 py-4">
@@ -201,6 +404,9 @@ export default function AdminProductsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1.5">
+                        <Button size="sm" variant="outline" onClick={() => openEdit(product)}>
+                          Edit
+                        </Button>
                         <Button
                           size="sm"
                           variant="primary"

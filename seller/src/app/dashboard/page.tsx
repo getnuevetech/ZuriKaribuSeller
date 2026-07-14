@@ -51,7 +51,7 @@ export default async function DashboardPage() {
           <nav className="hidden md:flex items-center gap-6 text-sm text-stone-500">
             <Link href="/dashboard" className="text-amber-600 font-medium">Dashboard</Link>
             <Link href="/dashboard/products" className="hover:text-stone-800 transition-colors">Products</Link>
-            <Link href="/dashboard/settings" className="hover:text-stone-800 transition-colors">Settings</Link>
+            <Link href="/dashboard/settings" className="hover:text-stone-800 transition-colors">Profile & Payments</Link>
           </nav>
           <div className="flex items-center gap-3">
             <span className="text-sm text-stone-500">{seller.name}</span>
