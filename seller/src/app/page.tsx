@@ -6,9 +6,9 @@ export default async function LandingPage() {
   const landing = await getLandingPageContent();
 
   const navItems = [
-    landing.sections.features ? { href: '#features', label: 'Features' } : null,
-    landing.sections.howItWorks ? { href: '#how-it-works', label: 'How It Works' } : null,
-    landing.sections.marketplace ? { href: '#marketplace', label: 'Marketplace Reach' } : null,
+    landing.sections.features ? { href: '#features', label: landing.navigation.featuresLabel } : null,
+    landing.sections.howItWorks ? { href: '#how-it-works', label: landing.navigation.howItWorksLabel } : null,
+    landing.sections.marketplace ? { href: '#marketplace', label: landing.navigation.marketplaceLabel } : null,
   ].filter((item): item is { href: string; label: string } => Boolean(item));
 
   return (
@@ -36,12 +36,12 @@ export default async function LandingPage() {
           <div className="flex items-center gap-3">
             <Link href="/auth/login">
               <Button variant="ghost" className="text-stone-700 hover:bg-stone-100 hover:text-stone-950">
-                Sign In
+                {landing.navigation.signInLabel}
               </Button>
             </Link>
             <Link href="/auth/register">
               <Button variant="primary" size="md" className="bg-amber-400 text-stone-950 hover:bg-amber-300">
-                Start Selling
+                {landing.navigation.registerLabel}
               </Button>
             </Link>
           </div>

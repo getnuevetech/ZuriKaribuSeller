@@ -202,6 +202,46 @@ export const DEFAULT_APP_SETTINGS: AppSettingSeed[] = [
     category: 'legal',
   },
   {
+    key: 'landing_nav_features_label',
+    value: 'Features',
+    label: 'Navigation Features Label',
+    description: 'Navigation label for the features section',
+    type: 'TEXT',
+    category: 'landing',
+  },
+  {
+    key: 'landing_nav_how_it_works_label',
+    value: 'How It Works',
+    label: 'Navigation How It Works Label',
+    description: 'Navigation label for the how-it-works section',
+    type: 'TEXT',
+    category: 'landing',
+  },
+  {
+    key: 'landing_nav_marketplace_label',
+    value: 'Marketplace Reach',
+    label: 'Navigation Marketplace Label',
+    description: 'Navigation label for the marketplace section',
+    type: 'TEXT',
+    category: 'landing',
+  },
+  {
+    key: 'landing_sign_in_label',
+    value: 'Sign In',
+    label: 'Header Sign In Label',
+    description: 'Button text for the landing page sign-in button',
+    type: 'TEXT',
+    category: 'landing',
+  },
+  {
+    key: 'landing_register_label',
+    value: 'Start Selling',
+    label: 'Header Register Label',
+    description: 'Button text for the landing page register button',
+    type: 'TEXT',
+    category: 'landing',
+  },
+  {
     key: 'landing_show_hero',
     value: 'true',
     label: 'Show Hero Section',
@@ -599,6 +639,13 @@ function readJsonSetting<T>(settings: SettingsMap, key: string, fallback: T): T 
 export type LandingPageContent = {
   siteName: string;
   siteTagline: string;
+  navigation: {
+    featuresLabel: string;
+    howItWorksLabel: string;
+    marketplaceLabel: string;
+    signInLabel: string;
+    registerLabel: string;
+  };
   sections: {
     hero: boolean;
     heroImage: boolean;
@@ -663,6 +710,13 @@ export async function getLandingPageContent(): Promise<LandingPageContent> {
   return {
     siteName: readSetting(settings, 'site_name'),
     siteTagline: readSetting(settings, 'site_tagline'),
+    navigation: {
+      featuresLabel: readSetting(settings, 'landing_nav_features_label'),
+      howItWorksLabel: readSetting(settings, 'landing_nav_how_it_works_label'),
+      marketplaceLabel: readSetting(settings, 'landing_nav_marketplace_label'),
+      signInLabel: readSetting(settings, 'landing_sign_in_label'),
+      registerLabel: readSetting(settings, 'landing_register_label'),
+    },
     sections: {
       hero: readBooleanSetting(settings, 'landing_show_hero'),
       heroImage: readBooleanSetting(settings, 'landing_show_hero_image'),

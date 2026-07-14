@@ -1,5 +1,3 @@
-import NextAuth from 'next-auth';
-
 declare module 'next-auth' {
   interface Session {
     user: {
@@ -8,6 +6,7 @@ declare module 'next-auth' {
       name?: string | null;
       image?: string | null;
       role: string;
+      isSuperAdmin: boolean;
     };
   }
 
@@ -16,6 +15,7 @@ declare module 'next-auth' {
     email: string;
     name?: string | null;
     role: string;
+    isSuperAdmin: boolean;
   }
 }
 
@@ -23,5 +23,6 @@ declare module 'next-auth/jwt' {
   interface JWT {
     id: string;
     role: string;
+    isSuperAdmin: boolean;
   }
 }

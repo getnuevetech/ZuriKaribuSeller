@@ -25,6 +25,10 @@ model User {
   accounts Account[]
   sessions Session[]
   seller   Seller?
+  adminProfile AdminProfile?
+  passwordResetTokens PasswordResetToken[]
+  passwordResetAuditsTriggered PasswordResetAudit[] @relation("PasswordResetAuditActor")
+  passwordResetAuditsReceived PasswordResetAudit[] @relation("PasswordResetAuditTarget")
 
   @@map("users")
 }
@@ -97,6 +101,21 @@ model Seller {
   products Product[]
 
   @@map("sellers")
+}
+
+model AdminProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  title        String?
+  phoneNumber  String?
+  isSuperAdmin Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("admin_profiles")
 }
 
 // ─── Product ──────────────────────────────────────────────────────────────────
@@ -186,6 +205,36 @@ model AppSetting {
   @@map("app_settings")
 }
 
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+model PasswordResetAudit {
+  id           String           @id @default(cuid())
+  actorUserId  String?
+  targetUserId String
+  action       PasswordResetAction
+  metadata     Json?
+  createdAt    DateTime         @default(now())
+
+  actorUser  User? @relation("PasswordResetAuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  targetUser User  @relation("PasswordResetAuditTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  @@index([targetUserId])
+  @@index([actorUserId])
+  @@map("password_reset_audits")
+}
+
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
 enum Role {
@@ -233,4 +282,10 @@ enum SettingType {
   BOOLEAN
   JSON
   SELECT
+}
+
+enum PasswordResetAction {
+  REQUESTED
+  COMPLETED
+  ADMIN_RESET
 }

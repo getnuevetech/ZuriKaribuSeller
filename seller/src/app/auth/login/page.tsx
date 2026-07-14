@@ -31,13 +31,13 @@ export default function LoginPage() {
     if (result?.error) {
       setError('Invalid email or password');
     } else {
-      router.push('/dashboard');
+      router.push('/auth/redirect');
     }
   }
 
   async function handleGoogle() {
     setGoogleLoading(true);
-    await signIn('google', { callbackUrl: '/dashboard' });
+    await signIn('google', { callbackUrl: '/auth/redirect' });
   }
 
   const googleEnabled = process.env.NEXT_PUBLIC_GOOGLE_ENABLED === 'true';
@@ -53,7 +53,7 @@ export default function LoginPage() {
             </div>
             <span className="font-display text-white text-2xl font-black">ZuriKaribu Sellers</span>
           </Link>
-          <p className="text-stone-400 mt-3">Sign in to your seller account</p>
+          <p className="text-stone-400 mt-3">Sign in to your seller or admin account</p>
         </div>
 
         <div className="bg-white rounded-3xl shadow-2xl p-8">
@@ -112,6 +112,12 @@ export default function LoginPage() {
               Sign In
             </Button>
           </form>
+
+          <div className="mt-4 text-right">
+            <Link href="/auth/forgot-password" className="text-sm text-amber-600 hover:text-amber-700 font-medium">
+              Forgot password?
+            </Link>
+          </div>
 
           <p className="text-center text-stone-500 text-sm mt-6">
             Don&apos;t have an account?{' '}
