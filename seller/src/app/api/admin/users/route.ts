@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { SellerStatus, SellerType } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { forbiddenResponse, requireAdminSession } from '@/lib/admin-auth';
@@ -33,7 +34,7 @@ function buildSellerCreatePayload(body: Record<string, unknown>) {
       email,
       password,
       name,
-      sellerType,
+      sellerType: sellerType as SellerType,
       mobileNo,
       countryCode,
       businessName,
@@ -43,7 +44,7 @@ function buildSellerCreatePayload(body: Record<string, unknown>) {
       availableFabrics: stringArray(body.availableFabrics),
       designFabrics: stringArray(body.designFabrics),
       sendSamples: Boolean(body.sendSamples),
-      status: cleanString(body.sellerStatus) || 'PENDING',
+      status: (cleanString(body.sellerStatus) || 'PENDING') as SellerStatus,
     },
   };
 }
@@ -109,7 +110,7 @@ export async function GET(req: NextRequest) {
   ]);
 
   return NextResponse.json({
-    users: users.map(({ password, ...user }) => user),
+    users: users.map((user) => ({ ...user, password: undefined })),
     total,
     page,
     pages: Math.ceil(total / limit),
@@ -132,67 +133,83 @@ export async function POST(req: NextRequest) {
     return forbiddenResponse('Only super admins can create admin users');
   }
 
-  const parsed = kind === 'seller'
-    ? buildSellerCreatePayload(body)
-    : buildAdminCreatePayload(body);
+  if (kind === 'seller') {
+    const parsedSeller = buildSellerCreatePayload(body);
+    if ('error' in parsedSeller) {
+      return NextResponse.json({ error: parsedSeller.error }, { status: 400 });
+    }
 
-  if ('error' in parsed) {
-    return NextResponse.json({ error: parsed.error }, { status: 400 });
+    const existingUser = await prisma.user.findUnique({ where: { email: parsedSeller.data.email } });
+    if (existingUser) {
+      return NextResponse.json({ error: 'Email already registered' }, { status: 409 });
+    }
+
+    const hashedPassword = await bcrypt.hash(parsedSeller.data.password, 12);
+    const user = await prisma.user.create({
+      data: {
+        email: parsedSeller.data.email,
+        password: hashedPassword,
+        name: parsedSeller.data.name,
+        role: 'SELLER',
+        seller: {
+          create: {
+            sellerType: parsedSeller.data.sellerType,
+            name: parsedSeller.data.name,
+            mobileNo: parsedSeller.data.mobileNo,
+            countryCode: parsedSeller.data.countryCode,
+            businessName: parsedSeller.data.businessName,
+            businessLicense: parsedSeller.data.businessLicense,
+            businessAddress: parsedSeller.data.businessAddress,
+            country: parsedSeller.data.country,
+            availableFabrics: parsedSeller.data.availableFabrics,
+            designFabrics: parsedSeller.data.designFabrics,
+            sendSamples: parsedSeller.data.sendSamples,
+            status: parsedSeller.data.status,
+          },
+        },
+      },
+      include: {
+        seller: true,
+        adminProfile: true,
+      },
+    });
+
+    return NextResponse.json({ user: { ...user, password: undefined } }, { status: 201 });
   }
 
-  const existingUser = await prisma.user.findUnique({ where: { email: parsed.data.email } });
+  const parsedAdmin = buildAdminCreatePayload(body);
+  if ('error' in parsedAdmin) {
+    return NextResponse.json({ error: parsedAdmin.error }, { status: 400 });
+  }
+
+  const existingUser = await prisma.user.findUnique({ where: { email: parsedAdmin.data.email } });
   if (existingUser) {
     return NextResponse.json({ error: 'Email already registered' }, { status: 409 });
   }
 
-  const hashedPassword = await bcrypt.hash(parsed.data.password, 12);
-
+  const hashedPassword = await bcrypt.hash(parsedAdmin.data.password, 12);
   const user = await prisma.user.create({
-    data: kind === 'seller'
-      ? {
-          email: parsed.data.email,
-          password: hashedPassword,
-          name: parsed.data.name,
-          role: 'SELLER',
-          seller: {
-            create: {
-              sellerType: parsed.data.sellerType,
-              name: parsed.data.name,
-              mobileNo: parsed.data.mobileNo,
-              countryCode: parsed.data.countryCode,
-              businessName: parsed.data.businessName,
-              businessLicense: parsed.data.businessLicense,
-              businessAddress: parsed.data.businessAddress,
-              country: parsed.data.country,
-              availableFabrics: parsed.data.availableFabrics,
-              designFabrics: parsed.data.designFabrics,
-              sendSamples: parsed.data.sendSamples,
-              status: parsed.data.status,
-            },
-          },
-        }
-      : {
-          email: parsed.data.email,
-          password: hashedPassword,
-          name: parsed.data.name,
-          role: 'ADMIN',
-          adminProfile: {
-            create: {
-              title: parsed.data.title,
-              phoneNumber: parsed.data.phoneNumber,
-              isSuperAdmin: parsed.data.isSuperAdmin,
-              isActive: parsed.data.isActive,
-            },
-          },
+    data: {
+      email: parsedAdmin.data.email,
+      password: hashedPassword,
+      name: parsedAdmin.data.name,
+      role: 'ADMIN',
+      adminProfile: {
+        create: {
+          title: parsedAdmin.data.title,
+          phoneNumber: parsedAdmin.data.phoneNumber,
+          isSuperAdmin: parsedAdmin.data.isSuperAdmin,
+          isActive: parsedAdmin.data.isActive,
         },
+      },
+    },
     include: {
       seller: true,
       adminProfile: true,
     },
   });
 
-  const { password, ...safeUser } = user;
-  return NextResponse.json({ user: safeUser }, { status: 201 });
+  return NextResponse.json({ user: { ...user, password: undefined } }, { status: 201 });
 }
 
 export async function PATCH(req: NextRequest) {

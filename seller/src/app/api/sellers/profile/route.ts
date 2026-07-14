@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma, SellerStatus, SellerType } from '@prisma/client';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import {
@@ -74,7 +75,7 @@ export async function PATCH(req: NextRequest) {
       name,
       seller: {
         update: {
-          sellerType,
+          sellerType: sellerType as SellerType,
           name,
           mobileNo,
           countryCode: cleanString(body.countryCode),
@@ -85,10 +86,14 @@ export async function PATCH(req: NextRequest) {
           availableFabrics: stringArray(body.availableFabrics),
           designFabrics: stringArray(body.designFabrics),
           sendSamples: Boolean(body.sendSamples),
-          ...(body.sellerStatus ? { status: cleanString(body.sellerStatus) } : {}),
+          ...(body.sellerStatus ? { status: cleanString(body.sellerStatus) as SellerStatus } : {}),
           ...(body.paypalEmail !== undefined && { paypalEmail: optionalString(body.paypalEmail) }),
-          ...(body.wireTransferInfo !== undefined && { wireTransferInfo: body.wireTransferInfo }),
-          ...(body.localDepositInfo !== undefined && { localDepositInfo: body.localDepositInfo }),
+          ...(body.wireTransferInfo !== undefined && {
+            wireTransferInfo: body.wireTransferInfo === null ? Prisma.JsonNull : body.wireTransferInfo,
+          }),
+          ...(body.localDepositInfo !== undefined && {
+            localDepositInfo: body.localDepositInfo === null ? Prisma.JsonNull : body.localDepositInfo,
+          }),
         },
       },
     },

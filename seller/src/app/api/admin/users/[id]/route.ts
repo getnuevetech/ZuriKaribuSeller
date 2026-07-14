@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { SellerStatus, SellerType } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { forbiddenResponse, requireAdminSession } from '@/lib/admin-auth';
 import {
@@ -71,7 +72,7 @@ export async function PATCH(
         name,
         seller: {
           update: {
-            sellerType,
+            sellerType: sellerType as SellerType,
             name,
             mobileNo,
             countryCode: cleanString(body.countryCode),
@@ -82,15 +83,14 @@ export async function PATCH(
             availableFabrics: stringArray(body.availableFabrics),
             designFabrics: stringArray(body.designFabrics),
             sendSamples: Boolean(body.sendSamples),
-            ...(body.sellerStatus ? { status: cleanString(body.sellerStatus) } : {}),
+            ...(body.sellerStatus ? { status: cleanString(body.sellerStatus) as SellerStatus } : {}),
           },
         },
       },
       include: { seller: true, adminProfile: true },
     });
 
-    const { password, ...safeSeller } = updatedUser;
-    return NextResponse.json({ user: safeSeller });
+    return NextResponse.json({ user: { ...updatedUser, password: undefined } });
   }
 
   const updatedAdmin = await prisma.user.update({
@@ -118,6 +118,5 @@ export async function PATCH(
     include: { seller: true, adminProfile: true },
   });
 
-  const { password, ...safeAdmin } = updatedAdmin;
-  return NextResponse.json({ user: safeAdmin });
+  return NextResponse.json({ user: { ...updatedAdmin, password: undefined } });
 }

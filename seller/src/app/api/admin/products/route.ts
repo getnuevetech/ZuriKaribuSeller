@@ -1,3 +1,4 @@
+import { ProductStatus } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { calculatePlatformPrice } from '@/lib/utils';
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest) {
   const description = cleanString(body.description);
   const costPrice = Number(body.costPrice);
   const sellingPrice = Number(body.sellingPrice);
-  const status = cleanString(body.status) || 'DRAFT';
+  const status = (cleanString(body.status) || 'DRAFT') as ProductStatus;
   const fabricsUsed = stringArray(body.fabricsUsed);
   const images = parseImageInputs(body.images);
 

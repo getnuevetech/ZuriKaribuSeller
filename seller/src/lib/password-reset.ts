@@ -1,4 +1,5 @@
 import { randomBytes, createHash } from 'crypto';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 
 const RESET_TOKEN_TTL_MS = 1000 * 60 * 60 * 2;
@@ -37,7 +38,7 @@ export async function markPasswordResetAudit(input: {
       actorUserId: input.actorUserId ?? null,
       targetUserId: input.targetUserId,
       action: input.action,
-      metadata: input.metadata,
+      metadata: input.metadata as Prisma.InputJsonValue | undefined,
     },
   });
 }
