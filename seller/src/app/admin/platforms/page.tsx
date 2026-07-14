@@ -24,15 +24,44 @@ export default function AdminPlatformsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
 
-  async function fetchPlatforms() {
-    setLoading(true);
+  async function getPlatforms() {
     const res = await fetch('/api/admin/platforms');
     const data = await res.json();
-    setPlatforms(data.platforms || []);
-    setLoading(false);
+    return data.platforms || [];
   }
 
-  useEffect(() => { fetchPlatforms(); }, []);
+  async function fetchPlatforms() {
+    setLoading(true);
+    try {
+      setPlatforms(await getPlatforms());
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadInitialPlatforms() {
+      try {
+        const nextPlatforms = await getPlatforms();
+
+        if (isMounted) {
+          setPlatforms(nextPlatforms);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadInitialPlatforms();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   function startEdit(platform: PlatformName, existingCreds: Record<string, string>) {
     setEditing(platform);
@@ -97,8 +126,11 @@ export default function AdminPlatformsPage() {
           </div>
         )}
 
-        <div className="grid lg:grid-cols-2 gap-6">
-          {allPlatforms.map((platform) => {
+        {loading ? (
+          <Card className="p-6 text-sm text-stone-500">Loading platform settings...</Card>
+        ) : (
+          <div className="grid lg:grid-cols-2 gap-6">
+            {allPlatforms.map((platform) => {
             const info = PLATFORM_INFO[platform];
             const gatewayData = platforms.find((p) => p.platform === platform);
             const fields = getPlatformCredentialFields(platform);
@@ -212,7 +244,8 @@ export default function AdminPlatformsPage() {
               </Card>
             );
           })}
-        </div>
+          </div>
+        )}
 
         {/* Instructions */}
         <Card className="mt-8 p-6">
