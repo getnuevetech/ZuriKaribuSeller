@@ -10,10 +10,11 @@ export default async function proxy(req: NextRequest) {
   });
 
   // Public routes
-  const publicRoutes = ['/', '/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password'];
+  const publicRoutes = ['/', '/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password', '/auth/activate-account'];
   const publicApiRoutes = [
     '/api/auth',
     '/api/sellers/register',
+    '/api/auth/activate-account',
   ];
   const isPublic = publicRoutes.includes(pathname) || publicApiRoutes.some((route) => pathname.startsWith(route));
 

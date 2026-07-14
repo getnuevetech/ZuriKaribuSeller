@@ -3,6 +3,8 @@ import { SellerStatus, SellerType } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { forbiddenResponse, requireAdminSession } from '@/lib/admin-auth';
+import { buildSellerActivationUrl, createSellerActivationToken } from '@/lib/email-verification';
+import { sendSellerNotification } from '@/lib/seller-notifications';
 import {
   cleanString,
   optionalString,
@@ -174,6 +176,23 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    try {
+      const origin = new URL(req.url).origin;
+      const { token, expiresAt } = await createSellerActivationToken(user.email);
+      const activationUrl = buildSellerActivationUrl(origin, token, user.email);
+      await sendSellerNotification({
+        key: 'seller_account_activation',
+        to: user.email,
+        variables: {
+          seller_name: user.name ?? user.seller?.name ?? user.email,
+          activation_url: activationUrl,
+          activation_expires_at: expiresAt.toISOString(),
+        },
+      });
+    } catch (notificationError) {
+      console.error('Failed to send admin-created seller activation notification:', notificationError);
+    }
+
     return NextResponse.json({ user: { ...user, password: undefined } }, { status: 201 });
   }
 
@@ -222,10 +241,36 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'userId and sellerStatus are required' }, { status: 400 });
   }
 
+  const seller = await prisma.seller.findUnique({
+    where: { userId },
+    include: { user: { select: { email: true, name: true } } },
+  });
+
+  if (!seller) {
+    return NextResponse.json({ error: 'Seller not found' }, { status: 404 });
+  }
+
   await prisma.seller.update({
     where: { userId },
     data: { status: sellerStatus },
   });
+
+  if (seller.status !== sellerStatus) {
+    try {
+      await sendSellerNotification({
+        key: 'seller_status_updated',
+        to: seller.user.email,
+        variables: {
+          seller_name: seller.user.name ?? seller.name,
+          previous_status: seller.status,
+          current_status: sellerStatus,
+          support_email: process.env.SUPPORT_EMAIL ?? 'support@zurikaribu.com',
+        },
+      });
+    } catch (notificationError) {
+      console.error('Failed to send seller status update notification:', notificationError);
+    }
+  }
 
   return NextResponse.json({ success: true });
 }

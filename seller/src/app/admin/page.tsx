@@ -45,6 +45,7 @@ export default async function AdminDashboard() {
             <Link href="/admin/users" className="hover:text-white transition-colors">Users</Link>
             <Link href="/admin/products" className="hover:text-white transition-colors">Products</Link>
             <Link href="/admin/platforms" className="hover:text-white transition-colors">Platforms</Link>
+            <Link href="/admin/notifications" className="hover:text-white transition-colors">Notifications</Link>
             <Link href="/admin/settings" className="hover:text-white transition-colors">Settings</Link>
           </nav>
           <form action="/api/auth/signout" method="POST">
@@ -134,11 +135,12 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="mt-6 grid sm:grid-cols-4 gap-4">
+        <div className="mt-6 grid sm:grid-cols-5 gap-4">
           {[
             { href: '/admin/users', label: 'Manage Users', icon: '👥' },
             { href: '/admin/products', label: 'Manage Products', icon: '📦' },
             { href: '/admin/platforms', label: 'Platform Gateway', icon: '🔗' },
+            { href: '/admin/notifications', label: 'Notifications', icon: '📧' },
             { href: '/admin/settings', label: 'App Settings', icon: '⚙️' },
           ].map((action) => (
             <Link key={action.href} href={action.href}>

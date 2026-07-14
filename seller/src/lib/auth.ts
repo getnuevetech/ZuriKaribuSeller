@@ -30,6 +30,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (user.role === 'ADMIN' && user.adminProfile && !user.adminProfile.isActive) {
           return null;
         }
+        if (user.role === 'SELLER' && !user.emailVerified) {
+          return null;
+        }
 
         const isValid = await bcrypt.compare(
           credentials.password as string,

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
+import { buildSellerActivationUrl, createSellerActivationToken } from '@/lib/email-verification';
+import { sendSellerNotification } from '@/lib/seller-notifications';
 
 export async function POST(req: NextRequest) {
   try {
@@ -60,14 +62,28 @@ export async function POST(req: NextRequest) {
       include: { seller: true },
     });
 
+    const origin = new URL(req.url).origin;
+    const { token, expiresAt } = await createSellerActivationToken(user.email);
+    const activationUrl = buildSellerActivationUrl(origin, token, user.email);
+
+    try {
+      await sendSellerNotification({
+        key: 'seller_account_activation',
+        to: user.email,
+        variables: {
+          seller_name: user.name ?? user.seller?.name ?? user.email,
+          activation_url: activationUrl,
+          activation_expires_at: expiresAt.toISOString(),
+        },
+      });
+    } catch (notificationError) {
+      console.error('Failed to send seller activation notification:', notificationError);
+    }
+
     return NextResponse.json({
       success: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        seller: user.seller,
-      },
+      message: 'Account created. Please verify your email to activate your account.',
+      ...(process.env.NODE_ENV !== 'production' ? { activationUrl, activationExpiresAt: expiresAt } : {}),
     });
   } catch (err) {
     console.error('Registration error:', err);

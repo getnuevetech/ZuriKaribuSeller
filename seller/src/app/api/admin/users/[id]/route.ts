@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { SellerStatus, SellerType } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { forbiddenResponse, requireAdminSession } from '@/lib/admin-auth';
+import { sendSellerNotification } from '@/lib/seller-notifications';
 import {
   cleanString,
   optionalString,
@@ -65,6 +66,9 @@ export async function PATCH(
       return NextResponse.json({ error: 'Missing required seller fields' }, { status: 400 });
     }
 
+    const nextSellerStatus = body.sellerStatus ? (cleanString(body.sellerStatus) as SellerStatus) : null;
+    const previousSellerStatus = user.seller?.status;
+
     const updatedUser = await prisma.user.update({
       where: { id },
       data: {
@@ -83,12 +87,29 @@ export async function PATCH(
             availableFabrics: stringArray(body.availableFabrics),
             designFabrics: stringArray(body.designFabrics),
             sendSamples: Boolean(body.sendSamples),
-            ...(body.sellerStatus ? { status: cleanString(body.sellerStatus) as SellerStatus } : {}),
+            ...(nextSellerStatus ? { status: nextSellerStatus } : {}),
           },
         },
       },
       include: { seller: true, adminProfile: true },
     });
+
+    if (nextSellerStatus && previousSellerStatus && nextSellerStatus !== previousSellerStatus) {
+      try {
+        await sendSellerNotification({
+          key: 'seller_status_updated',
+          to: updatedUser.email,
+          variables: {
+            seller_name: updatedUser.name ?? updatedUser.seller?.name ?? updatedUser.email,
+            previous_status: previousSellerStatus,
+            current_status: nextSellerStatus,
+            support_email: process.env.SUPPORT_EMAIL ?? 'support@zurikaribu.com',
+          },
+        });
+      } catch (notificationError) {
+        console.error('Failed to send seller status update notification:', notificationError);
+      }
+    }
 
     return NextResponse.json({ user: { ...updatedUser, password: undefined } });
   }
