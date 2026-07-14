@@ -593,6 +593,7 @@ export const DEFAULT_APP_SETTINGS: AppSettingSeed[] = [
     type: 'TEXT',
     category: 'landing',
   },
+  ...DEFAULT_NOTIFICATION_APP_SETTINGS,
 ];
 
 const DEFAULT_SETTING_VALUE_MAP = new Map(DEFAULT_APP_SETTINGS.map((setting) => [setting.key, setting.value]));
@@ -775,3 +776,4 @@ export async function getLandingPageContent(): Promise<LandingPageContent> {
     footerNote: readSetting(settings, 'landing_footer_note'),
   };
 }
+import { DEFAULT_NOTIFICATION_APP_SETTINGS } from '@/lib/notification-settings';

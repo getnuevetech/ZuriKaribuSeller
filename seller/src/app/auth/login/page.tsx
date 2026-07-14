@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -41,6 +42,8 @@ export default function LoginPage() {
   }
 
   const googleEnabled = process.env.NEXT_PUBLIC_GOOGLE_ENABLED === 'true';
+  const isFreshRegistration = searchParams.get('registered') === '1';
+  const needsEmailVerification = searchParams.get('verifyEmail') === '1';
 
   return (
     <div className="african-hero min-h-screen flex items-center justify-center p-4">
@@ -57,6 +60,13 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-white rounded-3xl shadow-2xl p-8">
+          {isFreshRegistration && (
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-700 text-sm">
+              {needsEmailVerification
+                ? 'Account created. Please check your email and activate your account before signing in.'
+                : 'Account created successfully. You can now sign in.'}
+            </div>
+          )}
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
               {error}

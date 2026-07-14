@@ -26,6 +26,7 @@ const CATEGORY_ICONS: Record<string, string> = {
   sellers: '🏪',
   legal: '📜',
   landing: '🏠',
+  notifications: '📧',
 };
 
 export default function AdminSettingsPage() {

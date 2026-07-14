@@ -149,20 +149,7 @@ export default function RegisterPage() {
         return;
       }
 
-      // Auto sign in after registration
-      const signInResult = await signIn('credentials', {
-        email: form.email,
-        password: form.password,
-        redirect: false,
-      });
-
-      if (signInResult?.error) {
-        // Registration succeeded but auto-login failed — redirect to login
-        router.push('/auth/login?registered=1');
-        return;
-      }
-
-      router.push('/auth/redirect');
+      router.push('/auth/login?registered=1&verifyEmail=1');
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
       setLoading(false);

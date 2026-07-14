@@ -13,44 +13,66 @@ const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: databaseUrl }),
 });
 
-async function main() {
-  console.log("🌱 Seeding database...");
-
-  // Create admin user
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@zurikaribu.com";
-  const adminPassword = process.env.ADMIN_PASSWORD || "Admin@ZuriKaribu2024!";
-
-  const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
+async function upsertAdmin(email: string, password: string, name: string) {
+  const existingAdmin = await prisma.user.findUnique({ where: { email } });
   if (!existingAdmin) {
-    const hashed = await bcrypt.hash(adminPassword, 12);
+    const hashed = await bcrypt.hash(password, 12);
     await prisma.user.create({
       data: {
-        email: adminEmail,
+        email,
         password: hashed,
-        name: "ZuriKaribu Sellers Admin",
+        name,
         role: "ADMIN",
         adminProfile: {
           create: {
             title: "Platform Administrator",
             isSuperAdmin: true,
+            isActive: true,
           },
         },
       },
     });
-    console.log(`✅ Admin user created: ${adminEmail}`);
-    console.log(`   Password: ${adminPassword}`);
+    console.log(`✅ Admin user created: ${email}`);
+    console.log(`   Password: ${password}`);
     console.log("   ⚠️  Change this password immediately after first login!");
   } else {
+    // Ensure adminProfile exists and is active
     await prisma.adminProfile.upsert({
       where: { userId: existingAdmin.id },
-      update: {},
+      update: { isActive: true, isSuperAdmin: true },
       create: {
         userId: existingAdmin.id,
         title: "Platform Administrator",
         isSuperAdmin: true,
+        isActive: true,
       },
     });
-    console.log(`ℹ️  Admin user already exists: ${adminEmail}`);
+    // Ensure role is ADMIN
+    if (existingAdmin.role !== "ADMIN") {
+      await prisma.user.update({
+        where: { id: existingAdmin.id },
+        data: { role: "ADMIN" },
+      });
+      console.log(`✅ User ${email} role updated to ADMIN`);
+    } else {
+      console.log(`ℹ️  Admin user already exists: ${email}`);
+    }
+  }
+}
+
+async function main() {
+  console.log("🌱 Seeding database...");
+
+  // Create primary admin user
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@zurikaribu.com";
+  const adminPassword = process.env.ADMIN_PASSWORD || "Admin@ZuriKaribu2024!";
+  await upsertAdmin(adminEmail, adminPassword, "ZuriKaribu Sellers Admin");
+
+  // Create secondary admin user (e.g. ag@nuevetech.io)
+  const secondaryAdminEmail = process.env.SECONDARY_ADMIN_EMAIL || "ag@nuevetech.io";
+  const secondaryAdminPassword = process.env.SECONDARY_ADMIN_PASSWORD || "Admin@NueveTech2024!";
+  if (secondaryAdminEmail !== adminEmail) {
+    await upsertAdmin(secondaryAdminEmail, secondaryAdminPassword, "Platform Admin");
   }
 
   // Seed default app settings
