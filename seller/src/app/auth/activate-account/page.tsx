@@ -9,16 +9,16 @@ type ActivationState = 'loading' | 'success' | 'error';
 
 export default function ActivateAccountPage() {
   const searchParams = useSearchParams();
-  const [state, setState] = useState<ActivationState>('loading');
-  const [message, setMessage] = useState('Activating your account...');
+  const token = searchParams.get('token');
+  const email = searchParams.get('email');
+  const hasActivationParams = Boolean(token && email);
+  const [state, setState] = useState<ActivationState>(hasActivationParams ? 'loading' : 'error');
+  const [message, setMessage] = useState(
+    hasActivationParams ? 'Activating your account...' : 'This activation link is incomplete.'
+  );
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    const email = searchParams.get('email');
-
-    if (!token || !email) {
-      setState('error');
-      setMessage('This activation link is incomplete.');
+    if (!hasActivationParams || !token || !email) {
       return;
     }
 
@@ -40,7 +40,7 @@ export default function ActivateAccountPage() {
         setState('error');
         setMessage(error instanceof Error ? error.message : 'Activation failed');
       });
-  }, [searchParams]);
+  }, [hasActivationParams, token, email]);
 
   return (
     <div className="african-hero min-h-screen flex items-center justify-center p-4">
