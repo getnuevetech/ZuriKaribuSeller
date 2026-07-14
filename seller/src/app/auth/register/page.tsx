@@ -162,7 +162,7 @@ export default function RegisterPage() {
         return;
       }
 
-      router.push('/dashboard');
+      router.push('/auth/redirect');
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
       setLoading(false);
@@ -171,7 +171,7 @@ export default function RegisterPage() {
 
   async function handleGoogle() {
     setGoogleLoading(true);
-    await signIn('google', { callbackUrl: '/dashboard' });
+    await signIn('google', { callbackUrl: '/auth/redirect' });
   }
 
   const googleEnabled = process.env.NEXT_PUBLIC_GOOGLE_ENABLED === 'true';

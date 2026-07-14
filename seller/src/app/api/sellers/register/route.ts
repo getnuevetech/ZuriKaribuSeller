@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
-import { calculatePlatformPrice } from '@/lib/utils';
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,12 +33,6 @@ export async function POST(req: NextRequest) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
-
-    // Get markup setting
-    const markupSetting = await prisma.appSetting.findUnique({
-      where: { key: 'platform_markup_percent' },
-    });
-    const markupPercent = parseFloat(markupSetting?.value || '15');
 
     // Create user + seller in a transaction
     const user = await prisma.user.create({

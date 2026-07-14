@@ -18,21 +18,35 @@ interface PlatformGateway {
 
 export default function AdminPlatformsPage() {
   const [platforms, setPlatforms] = useState<PlatformGateway[]>([]);
-  const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<PlatformName | null>(null);
   const [credentials, setCredentials] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
 
   async function fetchPlatforms() {
-    setLoading(true);
     const res = await fetch('/api/admin/platforms');
     const data = await res.json();
     setPlatforms(data.platforms || []);
-    setLoading(false);
   }
 
-  useEffect(() => { fetchPlatforms(); }, []);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPlatforms() {
+      const res = await fetch('/api/admin/platforms');
+      const data = await res.json();
+
+      if (!cancelled) {
+        setPlatforms(data.platforms || []);
+      }
+    }
+
+    void loadPlatforms();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function startEdit(platform: PlatformName, existingCreds: Record<string, string>) {
     setEditing(platform);
